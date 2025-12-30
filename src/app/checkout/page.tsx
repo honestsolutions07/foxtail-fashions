@@ -64,6 +64,13 @@ export default function CheckoutPage() {
 
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+    // Coupon State
+    const [couponCode, setCouponCode] = useState('');
+    const [appliedCoupon, setAppliedCoupon] = useState<any | null>(null);
+    const [couponError, setCouponError] = useState('');
+    const [couponLoading, setCouponLoading] = useState(false);
+    const [couponDiscount, setCouponDiscount] = useState(0);
+
     useEffect(() => {
         loadCart();
         if (user) {
@@ -137,6 +144,90 @@ export default function CheckoutPage() {
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const applyCoupon = async () => {
+        if (!couponCode) return;
+        setCouponLoading(true);
+        setCouponError('');
+
+        try {
+            const { supabase } = await import('@/lib/supabase');
+
+            // Fetch coupon
+            const { data, error } = await supabase
+                .from('coupons')
+                .select('*')
+                .eq('code', couponCode)
+                .single();
+
+            if (error || !data) {
+                setCouponError('Invalid coupon code');
+                setCouponLoading(false);
+                return;
+            }
+
+            const coupon = data;
+
+            // Validation
+            if (!coupon.is_active) {
+                setCouponError('This coupon is no longer active');
+                setCouponLoading(false);
+                return;
+            }
+
+            if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+                setCouponError('This coupon has expired');
+                setCouponLoading(false);
+                return;
+            }
+
+            if (coupon.usage_limit && coupon.used_count >= coupon.usage_limit) {
+                setCouponError('This coupon usage limit has been reached');
+                setCouponLoading(false);
+                return;
+            }
+
+            const currentSubtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            if (currentSubtotal < coupon.min_order_value) {
+                setCouponError(`Minimum order value of ₹${coupon.min_order_value} required`);
+                setCouponLoading(false);
+                return;
+            }
+
+            // Calculate Discount
+            let discount = 0;
+            if (coupon.discount_type === 'fixed') {
+                discount = coupon.discount_value;
+            } else {
+                discount = (currentSubtotal * coupon.discount_value) / 100;
+                if (coupon.max_discount_amount) {
+                    discount = Math.min(discount, coupon.max_discount_amount);
+                }
+            }
+
+            // Ensure discount doesn't exceed subtotal
+            discount = Math.min(discount, currentSubtotal);
+
+            setAppliedCoupon(coupon);
+            setCouponDiscount(Math.floor(discount));
+            setCouponError('');
+        } catch (error) {
+            console.error('Error applying coupon:', error);
+            setCouponError('Failed to apply coupon');
+        } finally {
+            setCouponLoading(false);
+        }
+    };
+
+    const removeCoupon = () => {
+        setAppliedCoupon(null);
+        setCouponDiscount(0);
+        setCouponCode('');
+        setCouponError('');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -168,7 +259,7 @@ export default function CheckoutPage() {
             // Calculate coins to be earned (1 coin per ₹100 spent on products, excluding shipping)
             const coinsEarned = Math.floor(subtotal / 100);
             const actualCoinsRedeemed = useCoins ? coinsToRedeem : 0;
-            const finalTotal = useCoins ? (subtotal + shipping - coinsToRedeem) : (subtotal + shipping);
+            const finalTotal = Math.max(0, subtotal + shipping - actualCoinsRedeemed - couponDiscount);
 
             // Create order in Supabase
             const { error } = await supabase.from('orders').insert({
@@ -190,6 +281,8 @@ export default function CheckoutPage() {
                 coins_redeemed: actualCoinsRedeemed,
                 coins_earned: coinsEarned,
                 coins_credited: false,
+                coupon_code: appliedCoupon ? appliedCoupon.code : null,
+                discount_amount: couponDiscount,
             });
 
             if (error) {
@@ -216,6 +309,15 @@ export default function CheckoutPage() {
                     });
                 } catch (coinError) {
                     console.error('Coin redemption error (non-blocking):', coinError);
+                }
+            }
+
+            // Increment Coupon Usage
+            if (appliedCoupon) {
+                try {
+                    await supabase.rpc('increment_coupon_usage', { coupon_code: appliedCoupon.code });
+                } catch (couponError) {
+                    console.error('Coupon increment error (non-blocking):', couponError);
                 }
             }
 
@@ -250,7 +352,7 @@ export default function CheckoutPage() {
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const shipping = subtotal > 899 ? 0 : 99;
     const coinsDiscount = useCoins ? coinsToRedeem : 0;
-    const total = subtotal + shipping - coinsDiscount;
+    const total = Math.max(0, subtotal + shipping - coinsDiscount - couponDiscount);
     const coinsToEarn = Math.floor(subtotal / 100); // 1 coin per ₹100
 
     // Max coins usable (can't exceed subtotal, and can't use more than user has)
@@ -491,10 +593,66 @@ export default function CheckoutPage() {
                                 </div>
                             )}
 
+                            {/* Coupon Section */}
+                            <div className="coupon-section">
+                                <h3>Promo Code</h3>
+                                <div className="coupon-input-wrapper">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter Coupon Code"
+                                        value={couponCode}
+                                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                        disabled={!!appliedCoupon}
+                                        className={couponError ? 'error' : ''}
+                                    />
+                                    {appliedCoupon ? (
+                                        <button type="button" onClick={removeCoupon} className="coupon-btn remove">
+                                            Remove
+                                        </button>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={applyCoupon}
+                                            className="coupon-btn apply"
+                                            disabled={!couponCode || couponLoading}
+                                        >
+                                            {couponLoading ? '...' : 'Apply'}
+                                        </button>
+                                    )}
+                                </div>
+                                {couponError && <p className="coupon-message error">{couponError}</p>}
+                                {appliedCoupon && (
+                                    <p className="coupon-message success">
+                                        Coupon applied! You saved ₹{couponDiscount}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="checkout-summary-divider"></div>
+
+                            <div className="checkout-summary-row">
+                                <span>Subtotal</span>
+                                <span>₹{subtotal.toLocaleString('en-IN')}</span>
+                            </div>
+
+                            <div className="checkout-summary-row">
+                                <span>Shipping</span>
+                                <span className={shipping === 0 ? 'free-shipping' : ''}>
+                                    {shipping === 0 ? 'FREE' : `₹${shipping}`}
+                                </span>
+                            </div>
+
                             {coinsDiscount > 0 && (
                                 <div className="checkout-summary-row fox-coins-discount">
                                     <span>🦊 Coins Discount</span>
                                     <span>-₹{coinsDiscount}</span>
+                                </div>
+                            )}
+
+                            {appliedCoupon && (
+                                <div className="checkout-summary-row coupon-discount">
+                                    <span>🎟️ Coupon Discount ({appliedCoupon.code})</span>
+                                    <span>-₹{couponDiscount}</span>
                                 </div>
                             )}
 
@@ -529,6 +687,7 @@ export default function CheckoutPage() {
                 </div>
             </main>
             <Footer />
+
         </div>
     );
 }

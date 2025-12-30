@@ -6585,3 +6585,77 @@ h6 {
     display: flex;
     align-items: center;
 }
+
+/* Coupon Section Styles */
+.coupon-section {
+    margin: 1.5rem 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.coupon-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+}
+
+.coupon-input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.coupon-input-wrapper input {
+    flex: 1;
+    padding: 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #1f2937;
+}
+
+.coupon-input-wrapper input.error {
+    border-color: #ef4444;
+}
+
+.coupon-btn {
+    padding: 0 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    height: 42px; /* Match input height roughly */
+}
+
+.coupon-btn.apply {
+    background: #000;
+    color: white;
+    border: 1px solid #000;
+}
+
+.coupon-btn.apply:disabled {
+    background: #9ca3af;
+    border-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.coupon-btn.remove {
+    background: white;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+
+.coupon-message {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.coupon-message.error { color: #ef4444; }
+.coupon-message.success { color: #10b981; }
+
+.coupon-discount { 
+    color: #10b981; 
+    font-weight: 600;
+}

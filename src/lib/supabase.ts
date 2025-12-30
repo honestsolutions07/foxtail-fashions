@@ -4,6 +4,20 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+export interface Coupon {
+    id: string;
+    code: string;
+    discount_type: 'percentage' | 'fixed';
+    discount_value: number;
+    min_order_value: number;
+    max_discount_amount?: number;
+    expires_at?: string;
+    is_active: boolean;
+    usage_limit?: number;
+    used_count: number;
+    created_at: string;
+}
+
 // Regular client for user operations (respects RLS)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 

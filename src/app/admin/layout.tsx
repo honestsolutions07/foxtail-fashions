@@ -38,6 +38,7 @@ export default function AdminLayout({
         { name: 'Ads', href: '/admin/ads', icon: '📢' },
         { name: 'T-Shirt Colors', href: '/admin/colors', icon: '🎨' },
         { name: 'Custom Pricing', href: '/admin/pricing', icon: '💰' },
+        { name: 'Coupons', href: '/admin/coupons', icon: '🎫' },
     ];
 
     if (isLoading) {
