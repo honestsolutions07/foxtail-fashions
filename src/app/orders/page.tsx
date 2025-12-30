@@ -260,6 +260,17 @@ export default function UserOrdersPage() {
                                                     <div className="user-order-tracking">
                                                         <h4>🚚 Tracking Information</h4>
                                                         <p>Tracking ID: <strong>{order.tracking_id}</strong></p>
+                                                        <p style={{ marginTop: '8px', fontSize: '14px', color: '#4b5563' }}>
+                                                            Track your shipment here:
+                                                            <a
+                                                                href="https://stcourier.com/track/shipment"
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                style={{ color: '#2563eb', textDecoration: 'underline', marginLeft: '6px', fontWeight: '500' }}
+                                                            >
+                                                                Details
+                                                            </a>
+                                                        </p>
                                                     </div>
                                                 )}
 
