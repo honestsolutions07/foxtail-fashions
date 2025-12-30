@@ -5,7 +5,11 @@ import { useState } from 'react';
 const faqs = [
     {
         question: 'What are your standard delivery timeframes?',
-        answer: 'We offer standard delivery within 5-7 business days and express delivery within 2-3 business days. Free shipping is available on orders over Rs. 899.',
+        answer: 'We offer standard delivery within 5-7 business days and express delivery within 2-3 business days across India.',
+    },
+    {
+        question: 'What are the delivery charges?',
+        answer: 'A standard delivery charge of ₹99 is applicable on all orders, regardless of the order value. This helps us ensure safe and timely delivery of your products.',
     },
     {
         question: 'What is your return and exchange policy?',
