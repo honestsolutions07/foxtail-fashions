@@ -92,20 +92,25 @@ function ReplacementRequestForm() {
         try {
             const file = e.target.files[0];
             const fileExt = file.name.split('.').pop();
-            const fileName = `${user?.id}/${orderId}/${Date.now()}.${fileExt}`;
-            const filePath = `replacement-images/${fileName}`;
+            const fileName = `${user?.id}_${orderId}_${Date.now()}.${fileExt}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('public')
-                .upload(filePath, file);
+                .from('replacements')
+                .upload(fileName, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                console.error('Upload error:', uploadError);
+                throw new Error(uploadError.message || 'Upload failed');
+            }
 
-            const { data } = supabase.storage.from('public').getPublicUrl(filePath);
+            const { data } = supabase.storage.from('replacements').getPublicUrl(fileName);
             setImages([...images, data.publicUrl]);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error uploading image:', error);
-            alert('Failed to upload image');
+            alert(`Failed to upload image: ${error.message || 'Unknown error'}. Please ensure the storage bucket is set up.`);
         } finally {
             setUploading(false);
         }
