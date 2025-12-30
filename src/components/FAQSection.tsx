@@ -5,7 +5,7 @@ import { useState } from 'react';
 const faqs = [
     {
         question: 'What are your standard delivery timeframes?',
-        answer: 'We offer standard delivery within 5-7 business days and express delivery within 2-3 business days. Free shipping is available on orders over Rs. 1000.',
+        answer: 'We offer standard delivery within 5-7 business days and express delivery within 2-3 business days. Free shipping is available on orders over Rs. 899.',
     },
     {
         question: 'What is your return and exchange policy?',

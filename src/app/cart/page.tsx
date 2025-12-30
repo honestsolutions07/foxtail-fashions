@@ -61,7 +61,7 @@ export default function CartPage() {
     };
 
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = subtotal > 999 ? 0 : 99;
+    const shipping = subtotal > 899 ? 0 : 99;
     const total = subtotal + shipping;
 
     if (loading) {
@@ -164,7 +164,7 @@ export default function CartPage() {
 
                                 {shipping > 0 && (
                                     <p className="cart-free-shipping-note">
-                                        Add ₹{(1000 - subtotal).toLocaleString('en-IN')} more for free shipping
+                                        Add ₹{(900 - subtotal).toLocaleString('en-IN')} more for free shipping
                                     </p>
                                 )}
 

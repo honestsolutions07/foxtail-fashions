@@ -270,7 +270,7 @@ export default function ProductPage() {
                                 </button>
                             </div>
                             <div className="product-features">
-                                <div className="product-feature"><span className="feature-icon">🚚</span><div><strong>Free Delivery</strong><p>On orders above ₹999</p></div></div>
+                                <div className="product-feature"><span className="feature-icon">🚚</span><div><strong>Free Delivery</strong><p>On orders above ₹899</p></div></div>
                                 <div className="product-feature"><span className="feature-icon">↩️</span><div><strong>Easy Returns</strong><p>7 days return policy</p></div></div>
                                 <div className="product-feature"><span className="feature-icon">💯</span><div><strong>100% Original</strong><p>Authentic products</p></div></div>
                             </div>

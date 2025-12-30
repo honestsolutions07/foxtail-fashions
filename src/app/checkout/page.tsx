@@ -248,7 +248,7 @@ export default function CheckoutPage() {
     };
 
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = subtotal > 999 ? 0 : 99;
+    const shipping = subtotal > 899 ? 0 : 99;
     const coinsDiscount = useCoins ? coinsToRedeem : 0;
     const total = subtotal + shipping - coinsDiscount;
     const coinsToEarn = Math.floor(subtotal / 100); // 1 coin per ₹100

@@ -16,7 +16,7 @@ const features = [
     {
         icon: '🚚',
         title: 'Fast Delivery',
-        description: 'Get your orders delivered within 3-5 business days. Free shipping on orders above 1000.',
+        description: 'Get your orders delivered within 3-5 business days. Free shipping on orders above 899.',
     },
 ];
 
