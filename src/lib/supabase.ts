@@ -18,6 +18,19 @@ export interface Coupon {
     created_at: string;
 }
 
+export interface ReplacementRequest {
+    id: string;
+    order_id: string;
+    user_id: string;
+    reason: string;
+    description?: string;
+    images: string[];
+    status: 'pending' | 'approved' | 'rejected' | 'completed';
+    admin_notes?: string;
+    created_at: string;
+    updated_at: string;
+}
+
 // Regular client for user operations (respects RLS)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 

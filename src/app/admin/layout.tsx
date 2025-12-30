@@ -35,6 +35,7 @@ export default function AdminLayout({
         { name: 'Products', href: '/admin/products', icon: '📦' },
         { name: 'Categories', href: '/admin/categories', icon: '📁' },
         { name: 'Orders', href: '/admin/orders', icon: '🛒' },
+        { name: 'Replacements', href: '/admin/replacements', icon: '🔄' },
         { name: 'Ads', href: '/admin/ads', icon: '📢' },
         { name: 'T-Shirt Colors', href: '/admin/colors', icon: '🎨' },
         { name: 'Custom Pricing', href: '/admin/pricing', icon: '💰' },

@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { supabase, ReplacementRequest } from '@/lib/supabase';
 
 interface OrderItem {
     product_id: string;
@@ -33,6 +33,7 @@ interface Order {
     status: string;
     cancel_reason?: string;
     tracking_id?: string;
+    delivered_at?: string;
     created_at: string;
 }
 
@@ -52,6 +53,7 @@ export default function UserOrdersPage() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+    const [replacementRequests, setReplacementRequests] = useState<{ [orderId: string]: ReplacementRequest }>({});
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -77,6 +79,22 @@ export default function UserOrdersPage() {
 
             if (error) throw error;
             setOrders(data || []);
+
+            // Fetch replacement requests for delivered orders
+            if (data && user) {
+                const { data: requests } = await supabase
+                    .from('replacement_requests')
+                    .select('*')
+                    .eq('user_id', user.id);
+
+                if (requests) {
+                    const requestMap: { [orderId: string]: ReplacementRequest } = {};
+                    requests.forEach((req: ReplacementRequest) => {
+                        requestMap[req.order_id] = req;
+                    });
+                    setReplacementRequests(requestMap);
+                }
+            }
         } catch (error) {
             console.error('Error fetching orders:', error);
         } finally {
@@ -87,6 +105,22 @@ export default function UserOrdersPage() {
 
     const handleRefresh = () => {
         fetchOrders(true);
+    };
+
+    // Check if replacement request is eligible (within 7 days of delivery)
+    const isReplacementEligible = (order: Order): boolean => {
+        if (order.status !== 'delivered') return false;
+        if (!order.delivered_at) {
+            // If no delivered_at, check if status changed to delivered within 7 days using created_at as fallback
+            const orderDate = new Date(order.created_at);
+            const now = new Date();
+            const diffDays = Math.floor((now.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
+            return diffDays <= 7;
+        }
+        const deliveredDate = new Date(order.delivered_at);
+        const now = new Date();
+        const diffDays = Math.floor((now.getTime() - deliveredDate.getTime()) / (1000 * 60 * 60 * 24));
+        return diffDays <= 7;
     };
 
     // Subscribe to real-time updates on orders
@@ -322,6 +356,37 @@ export default function UserOrdersPage() {
                                                         <span>₹{order.total.toLocaleString('en-IN')}</span>
                                                     </div>
                                                 </div>
+
+                                                {/* Replacement Request Section */}
+                                                {order.status === 'delivered' && (
+                                                    <div className="user-order-replacement">
+                                                        {replacementRequests[order.id] ? (
+                                                            <div className="replacement-status">
+                                                                <h4>🔄 Replacement Request</h4>
+                                                                <div className={`replacement-badge ${replacementRequests[order.id].status}`}>
+                                                                    {replacementRequests[order.id].status === 'pending' && '⏳ Pending Review'}
+                                                                    {replacementRequests[order.id].status === 'approved' && '✅ Approved'}
+                                                                    {replacementRequests[order.id].status === 'rejected' && '❌ Rejected'}
+                                                                    {replacementRequests[order.id].status === 'completed' && '🎉 Completed'}
+                                                                </div>
+                                                                {replacementRequests[order.id].admin_notes && (
+                                                                    <p className="admin-notes">Admin: {replacementRequests[order.id].admin_notes}</p>
+                                                                )}
+                                                            </div>
+                                                        ) : isReplacementEligible(order) ? (
+                                                            <Link
+                                                                href={`/replacements/request?orderId=${order.id}`}
+                                                                className="request-replacement-btn"
+                                                            >
+                                                                🔄 Request Replacement
+                                                            </Link>
+                                                        ) : (
+                                                            <p className="replacement-expired">
+                                                                Replacement period has expired (7 days from delivery)
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
