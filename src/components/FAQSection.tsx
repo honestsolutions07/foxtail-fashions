@@ -12,8 +12,8 @@ const faqs = [
         answer: 'A standard delivery charge of ₹99 is applicable on all orders, regardless of the order value. This helps us ensure safe and timely delivery of your products.',
     },
     {
-        question: 'What is your return and exchange policy?',
-        answer: 'We accept returns and exchanges within 30 days of purchase. Items must be unworn, unwashed, and with original tags attached. Free returns are available for all orders.',
+        question: 'What is your replacement policy?',
+        answer: 'We do not offer returns. However, we offer free replacements for damaged, defective, or incorrect items within 7 days of delivery. Please ensure items are unworn and have original tags.',
     },
     {
         question: 'How can I track my order?',
