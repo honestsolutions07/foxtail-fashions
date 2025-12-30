@@ -42,7 +42,7 @@ const AboutSection = () => {
                         }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                                 <div style={{ textAlign: 'center' }}>
-                                    <p style={{ fontSize: '28px', fontWeight: '700', color: '#65a30d' }}>230+</p>
+                                    <p style={{ fontSize: '28px', fontWeight: '700', color: '#65a30d' }}>100+</p>
                                     <p style={{ fontSize: '13px', color: '#6b7280' }}>Products</p>
                                 </div>
                                 <div style={{ textAlign: 'center' }}>
@@ -70,11 +70,11 @@ const AboutSection = () => {
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
                             <div className="stat-item">
-                                <p className="stat-number">15+</p>
+                                <p className="stat-number">5+</p>
                                 <p className="stat-label">Years Experience</p>
                             </div>
                             <div className="stat-item">
-                                <p className="stat-number">50K</p>
+                                <p className="stat-number">1000+</p>
                                 <p className="stat-label">Products Sold</p>
                             </div>
                             <div className="stat-item">
