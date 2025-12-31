@@ -387,7 +387,7 @@ export default function CheckoutPage() {
 
             // Send order confirmation emails (non-blocking)
             try {
-                const emailResponse = await fetch('/api/send-order-email', {
+                await fetch('/api/send-order-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -413,13 +413,6 @@ export default function CheckoutPage() {
                         }
                     }),
                 });
-
-                if (!emailResponse.ok) {
-                    const errText = await emailResponse.text();
-                    console.error('Email API failed:', emailResponse.status, errText);
-                } else {
-                    console.log('Email API initiated successfully');
-                }
             } catch (emailError) {
                 console.error('Email sending error (non-blocking):', emailError);
             }

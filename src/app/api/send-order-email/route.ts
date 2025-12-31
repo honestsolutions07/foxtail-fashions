@@ -29,26 +29,15 @@ interface OrderData {
     created_at: string;
 }
 
-const getTransporter = () => {
-    const user = process.env.EMAIL_USER;
-    const pass = process.env.EMAIL_PASS;
-
-    if (!user || !pass) {
-        console.error('❌ CRITICAL: Email credentials missing in environment variables');
-        console.error('EMAIL_USER present:', !!user);
-        console.error('EMAIL_PASS present:', !!pass);
-        return null;
-    }
-
-    return nodemailer.createTransport({
-        host: 'smtpout.secureserver.net',
-        port: 465,
-        secure: true,
-        auth: { user, pass },
-        logger: true,
-        debug: true,
-    });
-};
+const transporter = nodemailer.createTransport({
+    host: 'smtpout.secureserver.net',
+    port: 465,
+    secure: true,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
+});
 
 const generateOrderEmailHTML = (order: OrderData, isAdmin: boolean = false) => {
     const itemsHTML = order.items.map(item => `
@@ -202,64 +191,25 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Order data is required' }, { status: 400 });
         }
 
-        const transporter = getTransporter();
-
-        if (!transporter) {
-            return NextResponse.json({
-                success: false,
-                error: 'Server configuration error',
-                details: 'Email credentials missing or invalid'
-            }, { status: 500 });
-        }
-
-        console.log('📧 Sending order emails for order:', order.id);
-        console.log('Customer email:', order.customer_email);
-        console.log('Admin email:', process.env.ADMIN_EMAIL);
-
-        const emailErrors = [];
-
         // Send email to customer
-        try {
-            const customerResult = await transporter.sendMail({
-                from: `"Foxtail Fashions" <${process.env.EMAIL_USER}>`,
-                to: order.customer_email,
-                subject: `Order Confirmed! - Order #${order.id.slice(-8).toUpperCase()}`,
-                html: generateOrderEmailHTML(order, false),
-            });
-            console.log('✅ Customer email sent:', customerResult.messageId);
-        } catch (customerError: any) {
-            console.error('❌ Customer email failed:', customerError);
-            emailErrors.push(`Customer: ${customerError.message}`);
-        }
+        await transporter.sendMail({
+            from: `"Foxtail Fashions" <${process.env.EMAIL_USER}>`,
+            to: order.customer_email,
+            subject: `Order Confirmed! - Order #${order.id.slice(-8).toUpperCase()}`,
+            html: generateOrderEmailHTML(order, false),
+        });
 
         // Send email to admin
-        try {
-            const adminResult = await transporter.sendMail({
-                from: `"Foxtail Fashions" <${process.env.EMAIL_USER}>`,
-                to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
-                subject: `New Order Received - #${order.id.slice(-8).toUpperCase()} - Rs.${order.total}`,
-                html: generateOrderEmailHTML(order, true),
-            });
-            console.log('✅ Admin email sent:', adminResult.messageId);
-        } catch (adminError: any) {
-            console.error('❌ Admin email failed:', adminError);
-            emailErrors.push(`Admin: ${adminError.message}`);
-        }
+        await transporter.sendMail({
+            from: `"Foxtail Fashions" <${process.env.EMAIL_USER}>`,
+            to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
+            subject: `New Order Received - #${order.id.slice(-8).toUpperCase()} - Rs.${order.total.toLocaleString('en-IN')}`,
+            html: generateOrderEmailHTML(order, true),
+        });
 
-        if (emailErrors.length > 0) {
-            return NextResponse.json({
-                success: false,
-                error: 'Some emails failed',
-                details: emailErrors
-            }, { status: 500 });
-        }
-
-        return NextResponse.json({ success: true, message: 'Email process completed' });
-    } catch (error: any) {
-        console.error('❌ Error in email API:', error);
-        return NextResponse.json({
-            error: 'Failed to process email',
-            details: error.message
-        }, { status: 500 });
+        return NextResponse.json({ success: true, message: 'Emails sent successfully' });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
     }
 }
