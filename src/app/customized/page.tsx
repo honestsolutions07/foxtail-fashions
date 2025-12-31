@@ -132,18 +132,18 @@ export default function CustomizedPage() {
                             </div>
                             <div className="info-step">
                                 <span className="step-number">2</span>
-                                <h4>Upload Images</h4>
-                                <p>Add your front & back designs</p>
+                                <h4>Chat on WhatsApp</h4>
+                                <p>Click to start a conversation with us</p>
                             </div>
                             <div className="info-step">
                                 <span className="step-number">3</span>
-                                <h4>Pick Color & Size</h4>
-                                <p>Choose your preferred t-shirt color</p>
+                                <h4>Share Your Design</h4>
+                                <p>Send your images & customization details</p>
                             </div>
                             <div className="info-step">
                                 <span className="step-number">4</span>
-                                <h4>Place Order</h4>
-                                <p>We'll print & deliver to you!</p>
+                                <h4>We Deliver!</h4>
+                                <p>We'll print & deliver to your doorstep</p>
                             </div>
                         </div>
                     </div>
@@ -153,3 +153,4 @@ export default function CustomizedPage() {
         </div>
     );
 }
+
