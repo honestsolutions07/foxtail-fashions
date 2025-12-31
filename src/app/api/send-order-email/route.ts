@@ -191,25 +191,39 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Order data is required' }, { status: 400 });
         }
 
+        console.log('📧 Sending order emails for order:', order.id);
+        console.log('Customer email:', order.customer_email);
+        console.log('Admin email:', process.env.ADMIN_EMAIL);
+
         // Send email to customer
-        await transporter.sendMail({
-            from: `"Foxtail Fashions" <${process.env.EMAIL_USER}>`,
-            to: order.customer_email,
-            subject: `Order Confirmed! 🎉 - Order #${order.id.slice(-8).toUpperCase()}`,
-            html: generateOrderEmailHTML(order, false),
-        });
+        try {
+            const customerResult = await transporter.sendMail({
+                from: `"Foxtail Fashions" <${process.env.EMAIL_USER}>`,
+                to: order.customer_email,
+                subject: `Order Confirmed! - Order #${order.id.slice(-8).toUpperCase()}`,
+                html: generateOrderEmailHTML(order, false),
+            });
+            console.log('✅ Customer email sent:', customerResult.messageId);
+        } catch (customerError) {
+            console.error('❌ Customer email failed:', customerError);
+        }
 
         // Send email to admin
-        await transporter.sendMail({
-            from: `"Foxtail Fashions" <${process.env.EMAIL_USER}>`,
-            to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
-            subject: `🔔 New Order Received - #${order.id.slice(-8).toUpperCase()} - ₹${order.total.toLocaleString('en-IN')}`,
-            html: generateOrderEmailHTML(order, true),
-        });
+        try {
+            const adminResult = await transporter.sendMail({
+                from: `"Foxtail Fashions" <${process.env.EMAIL_USER}>`,
+                to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
+                subject: `New Order Received - #${order.id.slice(-8).toUpperCase()} - Rs.${order.total}`,
+                html: generateOrderEmailHTML(order, true),
+            });
+            console.log('✅ Admin email sent:', adminResult.messageId);
+        } catch (adminError) {
+            console.error('❌ Admin email failed:', adminError);
+        }
 
-        return NextResponse.json({ success: true, message: 'Emails sent successfully' });
+        return NextResponse.json({ success: true, message: 'Email process completed' });
     } catch (error) {
-        console.error('Error sending email:', error);
-        return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+        console.error('❌ Error in email API:', error);
+        return NextResponse.json({ error: 'Failed to process email' }, { status: 500 });
     }
 }
