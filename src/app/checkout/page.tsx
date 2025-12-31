@@ -543,7 +543,9 @@ export default function CheckoutPage() {
                                         </div>
                                         <div className="checkout-item-info">
                                             <p className="checkout-item-name">{item.name}</p>
-                                            <p className="checkout-item-size">Size: {item.size}</p>
+                                            {item.size && item.size !== 'One Size' && (
+                                                <p className="checkout-item-size">Size: {item.size}</p>
+                                            )}
                                         </div>
                                         <p className="checkout-item-price">₹{(item.price * item.quantity).toLocaleString('en-IN')}</p>
                                     </div>

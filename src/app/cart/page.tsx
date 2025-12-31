@@ -117,7 +117,9 @@ export default function CartPage() {
                                             <span className="cart-item-name">
                                                 {item.name}
                                             </span>
-                                            <p className="cart-item-size">Size: {item.size}</p>
+                                            {item.size && item.size !== 'One Size' && (
+                                                <p className="cart-item-size">Size: {item.size}</p>
+                                            )}
                                             {item.isCustom && item.customData && (
                                                 <p className="cart-item-color">
                                                     Color: <span style={{ backgroundColor: item.customData.color, display: 'inline-block', width: '14px', height: '14px', borderRadius: '50%', marginRight: '6px', verticalAlign: 'middle', border: '1px solid #ccc' }}></span>
