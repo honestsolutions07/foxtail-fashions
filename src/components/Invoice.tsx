@@ -15,7 +15,7 @@ interface OrderData {
     id: string;
     invoice_number?: string;
     customer_name: string;
-    customer_phone: string;
+    customer_phone?: string;
     shipping_address: string;
     city: string;
     state: string;
@@ -288,7 +288,7 @@ export default function Invoice({ order, onClose }: InvoiceProps) {
                     <div style={styles.billTo}>
                         <h3 style={styles.billToTitle}>Bill To:</h3>
                         <p style={styles.billToText}><strong>{order.customer_name}</strong></p>
-                        <p style={styles.billToText}>📞 {order.customer_phone}</p>
+                        {order.customer_phone && <p style={styles.billToText}>📞 {order.customer_phone}</p>}
                         <p style={styles.billToText}>{order.shipping_address}</p>
                         <p style={styles.billToText}>{order.city}, {order.state} - {order.pincode}</p>
                     </div>
