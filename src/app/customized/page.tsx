@@ -85,34 +85,41 @@ export default function CustomizedPage() {
                     </div>
 
                     <div className="customized-options">
-                        {customOptions.map((option) => (
-                            <Link
-                                href={`/customized/${option.id}`}
-                                key={option.id}
-                                className="customized-option-card"
-                            >
-                                <div className="option-text-content">
-                                    <h2>{option.title}</h2>
-                                    <p>{option.description}</p>
-                                    <div className="option-details">
-                                        <span className="option-price">₹{option.price}</span>
-                                        <span className="option-images">{option.images} Images</span>
+                        {customOptions.map((option) => {
+                            const whatsappMessage = `Hi! I'm interested in ordering a ${option.title} (₹${option.price}) from Foxtail Fashions. Please help me with the customization.`;
+                            const whatsappUrl = `https://wa.me/919952085521?text=${encodeURIComponent(whatsappMessage)}`;
+
+                            return (
+                                <a
+                                    href={whatsappUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    key={option.id}
+                                    className="customized-option-card"
+                                >
+                                    <div className="option-text-content">
+                                        <h2>{option.title}</h2>
+                                        <p>{option.description}</p>
+                                        <div className="option-details">
+                                            <span className="option-price">₹{option.price}</span>
+                                            <span className="option-images">{option.images} Images</span>
+                                        </div>
+                                        <div className="option-cta">
+                                            Order via WhatsApp →
+                                        </div>
                                     </div>
-                                    <div className="option-cta">
-                                        Design Now →
+                                    <div className="option-image">
+                                        <Image
+                                            src={option.image}
+                                            alt={option.title}
+                                            width={200}
+                                            height={220}
+                                            style={{ objectFit: 'contain' }}
+                                        />
                                     </div>
-                                </div>
-                                <div className="option-image">
-                                    <Image
-                                        src={option.image}
-                                        alt={option.title}
-                                        width={200}
-                                        height={220}
-                                        style={{ objectFit: 'contain' }}
-                                    />
-                                </div>
-                            </Link>
-                        ))}
+                                </a>
+                            );
+                        })}
                     </div>
 
                     <div className="customized-info">
