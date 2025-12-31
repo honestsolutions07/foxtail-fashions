@@ -29,17 +29,26 @@ interface OrderData {
     created_at: string;
 }
 
-const transporter = nodemailer.createTransport({
-    host: 'smtpout.secureserver.net',
-    port: 465,
-    secure: true, // SSL
-    auth: {
-        user: process.env.EMAIL_USER, // info@foxtailfashions.in
-        pass: process.env.EMAIL_PASS, // GoDaddy email password
-    },
-    logger: true, // Log to console
-    debug: true,  // Include SMTP traffic in logs
-});
+const getTransporter = () => {
+    const user = process.env.EMAIL_USER;
+    const pass = process.env.EMAIL_PASS;
+
+    if (!user || !pass) {
+        console.error('❌ CRITICAL: Email credentials missing in environment variables');
+        console.error('EMAIL_USER present:', !!user);
+        console.error('EMAIL_PASS present:', !!pass);
+        return null;
+    }
+
+    return nodemailer.createTransport({
+        host: 'smtpout.secureserver.net',
+        port: 465,
+        secure: true,
+        auth: { user, pass },
+        logger: true,
+        debug: true,
+    });
+};
 
 const generateOrderEmailHTML = (order: OrderData, isAdmin: boolean = false) => {
     const itemsHTML = order.items.map(item => `
@@ -191,6 +200,16 @@ export async function POST(request: NextRequest) {
 
         if (!order) {
             return NextResponse.json({ error: 'Order data is required' }, { status: 400 });
+        }
+
+        const transporter = getTransporter();
+
+        if (!transporter) {
+            return NextResponse.json({
+                success: false,
+                error: 'Server configuration error',
+                details: 'Email credentials missing or invalid'
+            }, { status: 500 });
         }
 
         console.log('📧 Sending order emails for order:', order.id);
