@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import Invoice from '@/components/Invoice';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase, ReplacementRequest } from '@/lib/supabase';
 
@@ -20,15 +21,21 @@ interface OrderItem {
 
 interface Order {
     id: string;
+    invoice_number?: string;
     customer_name: string;
     customer_email: string;
+    customer_phone: string;
     shipping_address: string;
     city: string;
     state: string;
     pincode: string;
     items: OrderItem[];
     subtotal: number;
+    gst_amount?: number;
     shipping: number;
+    discount_amount?: number;
+    coupon_code?: string;
+    coins_redeemed?: number;
     total: number;
     status: string;
     cancel_reason?: string;
@@ -54,6 +61,7 @@ export default function UserOrdersPage() {
     const [refreshing, setRefreshing] = useState(false);
     const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
     const [replacementRequests, setReplacementRequests] = useState<{ [orderId: string]: ReplacementRequest }>({});
+    const [invoiceOrder, setInvoiceOrder] = useState<Order | null>(null);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -351,11 +359,30 @@ export default function UserOrdersPage() {
                                                         <span>Shipping</span>
                                                         <span>{order.shipping === 0 ? 'FREE' : `₹${order.shipping}`}</span>
                                                     </div>
+                                                    {order.gst_amount && order.gst_amount > 0 && (
+                                                        <div className="payment-row">
+                                                            <span>GST (5%)</span>
+                                                            <span>₹{order.gst_amount.toLocaleString('en-IN')}</span>
+                                                        </div>
+                                                    )}
                                                     <div className="payment-row total">
                                                         <span>Total</span>
                                                         <span>₹{order.total.toLocaleString('en-IN')}</span>
                                                     </div>
                                                 </div>
+
+                                                {/* Download Invoice */}
+                                                {order.status !== 'cancelled' && order.status !== 'pending' && (
+                                                    <button
+                                                        className="download-invoice-btn"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setInvoiceOrder(order);
+                                                        }}
+                                                    >
+                                                        📄 Download Invoice
+                                                    </button>
+                                                )}
 
                                                 {/* Replacement Request Section */}
                                                 {order.status === 'delivered' && (
@@ -397,6 +424,14 @@ export default function UserOrdersPage() {
                 </div>
             </main>
             <Footer />
+
+            {/* Invoice Modal */}
+            {invoiceOrder && (
+                <Invoice
+                    order={invoiceOrder}
+                    onClose={() => setInvoiceOrder(null)}
+                />
+            )}
         </div>
     );
 }

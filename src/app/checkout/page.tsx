@@ -259,7 +259,13 @@ export default function CheckoutPage() {
             // Calculate coins to be earned (1 coin per ₹100 spent on products, excluding shipping)
             const coinsEarned = Math.floor(subtotal / 100);
             const actualCoinsRedeemed = useCoins ? coinsToRedeem : 0;
-            const finalTotal = Math.max(0, subtotal + shipping - actualCoinsRedeemed - couponDiscount);
+            const gstAmt = Math.round(subtotal * 0.05); // 5% GST
+            const finalTotal = Math.max(0, subtotal + gstAmt + shipping - actualCoinsRedeemed - couponDiscount);
+
+            // Generate invoice number: INV-YYYYMMDD-RANDOM
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
+            const invoiceNumber = `INV-${dateStr}-${orderId.slice(-6).toUpperCase()}`;
 
             // Create order in Supabase
             const { error } = await supabase.from('orders').insert({
@@ -274,6 +280,8 @@ export default function CheckoutPage() {
                 landmark: formData.landmark || null,
                 items: orderItems,
                 subtotal: subtotal,
+                gst_amount: gstAmt,
+                invoice_number: invoiceNumber,
                 shipping: shipping,
                 total: finalTotal,
                 status: 'pending',
@@ -350,13 +358,14 @@ export default function CheckoutPage() {
     };
 
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const gstAmount = Math.round(subtotal * 0.05); // 5% GST
     const shipping = subtotal > 899 ? 0 : 99;
     const coinsDiscount = useCoins ? coinsToRedeem : 0;
-    const total = Math.max(0, subtotal + shipping - coinsDiscount - couponDiscount);
+    const total = Math.max(0, subtotal + gstAmount + shipping - coinsDiscount - couponDiscount);
     const coinsToEarn = Math.floor(subtotal / 100); // 1 coin per ₹100
 
     // Max coins usable (can't exceed subtotal, and can't use more than user has)
-    const maxRedeemableCoins = Math.min(userCoins, subtotal);
+    const maxRedeemableCoins = Math.min(userCoins, subtotal + gstAmount);
 
     const handleCoinsChange = (value: number) => {
         const validValue = Math.max(0, Math.min(value, maxRedeemableCoins));
@@ -633,6 +642,11 @@ export default function CheckoutPage() {
                             <div className="checkout-summary-row">
                                 <span>Subtotal</span>
                                 <span>₹{subtotal.toLocaleString('en-IN')}</span>
+                            </div>
+
+                            <div className="checkout-summary-row">
+                                <span>GST (5%)</span>
+                                <span>₹{gstAmount.toLocaleString('en-IN')}</span>
                             </div>
 
                             <div className="checkout-summary-row">

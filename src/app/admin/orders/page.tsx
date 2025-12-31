@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
+import Invoice from '@/components/Invoice';
 
 interface OrderItem {
     product_id: string;
@@ -27,6 +28,7 @@ interface OrderItem {
 
 interface Order {
     id: string;
+    invoice_number?: string;
     customer_name: string;
     customer_email: string;
     customer_phone: string;
@@ -37,7 +39,11 @@ interface Order {
     landmark?: string;
     items: OrderItem[];
     subtotal: number;
+    gst_amount?: number;
     shipping: number;
+    discount_amount?: number;
+    coupon_code?: string;
+    coins_redeemed?: number;
     total: number;
     status: string;
     payment_status: string;
@@ -65,6 +71,7 @@ export default function AdminOrdersPage() {
     const [trackingId, setTrackingId] = useState('');
     const [updating, setUpdating] = useState(false);
     const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+    const [invoiceOrder, setInvoiceOrder] = useState<Order | null>(null);
 
     useEffect(() => {
         fetchOrders();
@@ -567,6 +574,12 @@ export default function AdminOrdersPage() {
                                         <span>Subtotal</span>
                                         <span>₹{selectedOrder.subtotal.toLocaleString('en-IN')}</span>
                                     </div>
+                                    {selectedOrder.gst_amount && selectedOrder.gst_amount > 0 && (
+                                        <div className="summary-row">
+                                            <span>GST (5%)</span>
+                                            <span>₹{selectedOrder.gst_amount.toLocaleString('en-IN')}</span>
+                                        </div>
+                                    )}
                                     <div className="summary-row">
                                         <span>Shipping</span>
                                         <span>{selectedOrder.shipping === 0 ? 'FREE' : `₹${selectedOrder.shipping}`}</span>
@@ -576,6 +589,17 @@ export default function AdminOrdersPage() {
                                         <span>₹{selectedOrder.total.toLocaleString('en-IN')}</span>
                                     </div>
                                 </div>
+
+                                {/* Download Invoice Button */}
+                                {selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'pending' && (
+                                    <button
+                                        className="download-invoice-btn"
+                                        onClick={() => setInvoiceOrder(selectedOrder)}
+                                        style={{ marginTop: '1rem', width: '100%' }}
+                                    >
+                                        📄 Download Invoice
+                                    </button>
+                                )}
                             </>
                         ) : (
                             <div className="no-order-selected">
@@ -619,6 +643,14 @@ export default function AdminOrdersPage() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Invoice Modal */}
+            {invoiceOrder && (
+                <Invoice
+                    order={invoiceOrder}
+                    onClose={() => setInvoiceOrder(null)}
+                />
             )}
         </div>
     );
