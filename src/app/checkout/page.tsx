@@ -348,6 +348,38 @@ export default function CheckoutPage() {
             localStorage.setItem('cart', JSON.stringify([]));
             window.dispatchEvent(new Event('cartUpdated'));
 
+            // Send order confirmation emails (non-blocking)
+            try {
+                await fetch('/api/send-order-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        order: {
+                            id: orderId,
+                            invoice_number: invoiceNumber,
+                            customer_name: formData.fullName,
+                            customer_email: formData.email,
+                            customer_phone: formData.phone,
+                            shipping_address: formData.address,
+                            city: formData.city,
+                            state: formData.state,
+                            pincode: formData.pincode,
+                            items: orderItems,
+                            subtotal: subtotal,
+                            gst_amount: gstAmt,
+                            shipping: shipping,
+                            discount_amount: couponDiscount,
+                            coupon_code: appliedCoupon?.code,
+                            coins_redeemed: actualCoinsRedeemed,
+                            total: finalTotal,
+                            created_at: new Date().toISOString(),
+                        }
+                    }),
+                });
+            } catch (emailError) {
+                console.error('Email sending error (non-blocking):', emailError);
+            }
+
             // Navigate to confirmation page
             router.push('/order-confirmation');
         } catch (error) {
