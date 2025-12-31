@@ -101,8 +101,8 @@ const Header = () => {
           <Image
             src="/logo.png"
             alt="Foxtail Fashions Logo"
-            width={40}
-            height={40}
+            width={20}
+            height={20}
             style={{ objectFit: 'contain' }}
           />
           <span style={{ fontSize: '20px', fontWeight: '700', letterSpacing: '-0.5px' }}>Foxtail Fashions</span>
