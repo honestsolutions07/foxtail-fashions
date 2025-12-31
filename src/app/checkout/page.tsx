@@ -70,6 +70,7 @@ export default function CheckoutPage() {
     const [couponError, setCouponError] = useState('');
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponDiscount, setCouponDiscount] = useState(0);
+    const [isFirstOrder, setIsFirstOrder] = useState(false);
 
     useEffect(() => {
         loadCart();
@@ -81,6 +82,10 @@ export default function CheckoutPage() {
             }));
             // Fetch user's Fox Coins balance
             fetchUserCoins(user.id);
+            // Check if first order
+            if (user.email) {
+                checkFirstOrder(user.email);
+            }
         }
     }, [user]);
 
@@ -97,6 +102,23 @@ export default function CheckoutPage() {
             }
         } catch (error) {
             console.error('Error fetching coins:', error);
+        }
+    };
+
+    const checkFirstOrder = async (userEmail: string) => {
+        try {
+            const { supabase } = await import('@/lib/supabase');
+            const { data, error } = await supabase
+                .from('orders')
+                .select('id')
+                .eq('customer_email', userEmail)
+                .limit(1);
+
+            if (!error && (!data || data.length === 0)) {
+                setIsFirstOrder(true);
+            }
+        } catch (error) {
+            console.error('Error checking first order:', error);
         }
     };
 
@@ -639,6 +661,34 @@ export default function CheckoutPage() {
                             {/* Coupon Section */}
                             <div className="coupon-section">
                                 <h3>Promo Code</h3>
+
+                                {/* First Order FUFO Banner */}
+                                {isFirstOrder && !appliedCoupon && (
+                                    <div style={{
+                                        background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+                                        border: '1px solid #10b981',
+                                        borderRadius: '10px',
+                                        padding: '12px 16px',
+                                        marginBottom: '16px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                    }}>
+                                        <span style={{ fontSize: '24px' }}>🎉</span>
+                                        <div>
+                                            <p style={{ margin: 0, fontWeight: 600, color: '#065f46', fontSize: '14px' }}>
+                                                First Order? Use code <span style={{
+                                                    background: '#10b981',
+                                                    color: 'white',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '4px',
+                                                    fontFamily: 'monospace',
+                                                    letterSpacing: '1px'
+                                                }}>FUFO</span> for FREE Delivery!
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="coupon-input-wrapper">
                                     <input
                                         type="text"
