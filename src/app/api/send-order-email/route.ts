@@ -197,6 +197,8 @@ export async function POST(request: NextRequest) {
         console.log('Customer email:', order.customer_email);
         console.log('Admin email:', process.env.ADMIN_EMAIL);
 
+        const emailErrors = [];
+
         // Send email to customer
         try {
             const customerResult = await transporter.sendMail({
@@ -206,8 +208,9 @@ export async function POST(request: NextRequest) {
                 html: generateOrderEmailHTML(order, false),
             });
             console.log('✅ Customer email sent:', customerResult.messageId);
-        } catch (customerError) {
+        } catch (customerError: any) {
             console.error('❌ Customer email failed:', customerError);
+            emailErrors.push(`Customer: ${customerError.message}`);
         }
 
         // Send email to admin
@@ -219,13 +222,25 @@ export async function POST(request: NextRequest) {
                 html: generateOrderEmailHTML(order, true),
             });
             console.log('✅ Admin email sent:', adminResult.messageId);
-        } catch (adminError) {
+        } catch (adminError: any) {
             console.error('❌ Admin email failed:', adminError);
+            emailErrors.push(`Admin: ${adminError.message}`);
+        }
+
+        if (emailErrors.length > 0) {
+            return NextResponse.json({
+                success: false,
+                error: 'Some emails failed',
+                details: emailErrors
+            }, { status: 500 });
         }
 
         return NextResponse.json({ success: true, message: 'Email process completed' });
-    } catch (error) {
+    } catch (error: any) {
         console.error('❌ Error in email API:', error);
-        return NextResponse.json({ error: 'Failed to process email' }, { status: 500 });
+        return NextResponse.json({
+            error: 'Failed to process email',
+            details: error.message
+        }, { status: 500 });
     }
 }
