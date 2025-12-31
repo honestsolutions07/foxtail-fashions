@@ -78,7 +78,9 @@ export default function ProductPage() {
     const addToCart = () => {
         if (!product) return;
 
-        if (!selectedSize) {
+        // Skip size check for accessories
+        const isAccessory = product.category?.toLowerCase() === 'accessories';
+        if (!isAccessory && !selectedSize) {
             alert('Please select a size');
             return;
         }
@@ -237,24 +239,27 @@ export default function ProductPage() {
                                     <p>{product.description}</p>
                                 </div>
                             )}
-                            <div className="product-sizes">
-                                <div className="product-sizes-header">
-                                    <h3>Select Size</h3>
-                                    {product.size_mode === 'all' && <span className="size-availability">Available in all sizes</span>}
+                            {/* Size selection - hide for accessories */}
+                            {product.category?.toLowerCase() !== 'accessories' && (
+                                <div className="product-sizes">
+                                    <div className="product-sizes-header">
+                                        <h3>Select Size</h3>
+                                        {product.size_mode === 'all' && <span className="size-availability">Available in all sizes</span>}
+                                    </div>
+                                    <div className="product-sizes-grid">
+                                        {getSizes().map(size => {
+                                            const quantity = getSizeQuantity(size);
+                                            const isOutOfStock = quantity !== null && quantity === 0;
+                                            return (
+                                                <button key={size} className={`product-size-btn ${selectedSize === size ? 'active' : ''} ${isOutOfStock ? 'out-of-stock' : ''}`} onClick={() => !isOutOfStock && setSelectedSize(size)} disabled={isOutOfStock}>
+                                                    {size}
+                                                    {quantity !== null && quantity > 0 && quantity < 5 && <span className="size-low-stock">Only {quantity} left</span>}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                                <div className="product-sizes-grid">
-                                    {getSizes().map(size => {
-                                        const quantity = getSizeQuantity(size);
-                                        const isOutOfStock = quantity !== null && quantity === 0;
-                                        return (
-                                            <button key={size} className={`product-size-btn ${selectedSize === size ? 'active' : ''} ${isOutOfStock ? 'out-of-stock' : ''}`} onClick={() => !isOutOfStock && setSelectedSize(size)} disabled={isOutOfStock}>
-                                                {size}
-                                                {quantity !== null && quantity > 0 && quantity < 5 && <span className="size-low-stock">Only {quantity} left</span>}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                            )}
                             <div className="product-actions">
                                 <button className={`product-add-to-cart ${addedToCart ? 'added' : ''}`} onClick={addToCart}>
                                     {addedToCart ? (
