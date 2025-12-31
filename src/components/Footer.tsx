@@ -59,12 +59,7 @@ const Footer = () => {
                     </div>
 
                     {/* Links */}
-                    <div>
-                        <h4 className="footer-title">Company</h4>
-                        {footerLinks.company.map((link) => (
-                            <Link key={link.name} href={link.href} className="footer-link">{link.name}</Link>
-                        ))}
-                    </div>
+
 
 
 

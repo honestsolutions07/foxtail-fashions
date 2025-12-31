@@ -18,7 +18,7 @@ const AboutSection = () => {
                             />
                             {/* Floating Card */}
                             <div className="glass-card" style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px' }}>
-                                <p style={{ fontSize: '28px', fontWeight: '700', fontStyle: 'italic', marginBottom: '8px' }}>FASHION</p>
+                                <p style={{ fontSize: '28px', fontWeight: '700', fontStyle: 'italic', marginBottom: '8px' }}>FOXTAIL FASHIONS</p>
                                 <div style={{ display: 'flex', gap: '16px', fontSize: '13px' }}>
                                     <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <span style={{ width: '8px', height: '8px', background: '#a3e635', borderRadius: '50%' }}></span>
@@ -75,7 +75,7 @@ const AboutSection = () => {
                             </div>
                             <div className="stat-item">
                                 <p className="stat-number">1000+</p>
-                                <p className="stat-label">Products Sold</p>
+                                <p className="stat-label">Orders</p>
                             </div>
                             <div className="stat-item">
                                 <p className="stat-number">98%</p>
@@ -83,12 +83,7 @@ const AboutSection = () => {
                             </div>
                         </div>
 
-                        <button className="btn-secondary" style={{ alignSelf: 'flex-start' }}>
-                            Learn More About Us
-                            <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                        </button>
+
                     </div>
                 </div>
             </div>
