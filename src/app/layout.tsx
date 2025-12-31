@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   title: "Foxtail Fashions | Redefine Your Style",
   description: "Discover the perfect blend of comfort and elegance. Premium fashion that transcends seasons with modern craftsmanship and sustainable practices.",
   keywords: ["fashion", "clothing", "style", "premium", "sustainable", "modern", "foxtail fashions"],
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
   openGraph: {
     title: "Foxtail Fashions | Redefine Your Style",
     description: "Discover the perfect blend of comfort and elegance. Premium fashion for the modern individual.",

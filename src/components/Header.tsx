@@ -99,7 +99,7 @@ const Header = () => {
         {/* Logo */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: 'inherit' }}>
           <Image
-            src="/foxtail-logo.png"
+            src="/logo.png"
             alt="Foxtail Fashions Logo"
             width={40}
             height={40}

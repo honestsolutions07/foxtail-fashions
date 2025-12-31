@@ -72,7 +72,10 @@ export default function AdminLayout({
             {/* Sidebar */}
             <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
                 <div className="admin-sidebar-header">
-                    <h2>🦊 Foxtail Admin</h2>
+                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <img src="/logo.png" alt="Logo" style={{ width: '28px', height: '28px' }} />
+                        Foxtail Admin
+                    </h2>
                     <button
                         className="admin-sidebar-close"
                         onClick={() => setSidebarOpen(false)}

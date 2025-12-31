@@ -273,7 +273,10 @@ export default function Invoice({ order, onClose }: InvoiceProps) {
                     {/* Header */}
                     <div style={styles.header}>
                         <div>
-                            <h1 style={styles.companyName}>🦊 {COMPANY_INFO.name}</h1>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.5rem' }}>
+                                <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px' }} />
+                                <h1 style={styles.companyName}>{COMPANY_INFO.name}</h1>
+                            </div>
                             <p style={styles.companyText}>{COMPANY_INFO.address}</p>
                             <p style={styles.companyText}><strong>GSTIN:</strong> {COMPANY_INFO.gstin}</p>
                         </div>
