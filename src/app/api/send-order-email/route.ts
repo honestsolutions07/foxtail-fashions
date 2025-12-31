@@ -37,6 +37,8 @@ const transporter = nodemailer.createTransport({
         user: process.env.EMAIL_USER, // info@foxtailfashions.in
         pass: process.env.EMAIL_PASS, // GoDaddy email password
     },
+    logger: true, // Log to console
+    debug: true,  // Include SMTP traffic in logs
 });
 
 const generateOrderEmailHTML = (order: OrderData, isAdmin: boolean = false) => {
