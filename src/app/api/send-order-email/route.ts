@@ -66,7 +66,7 @@ const generateOrderEmailHTML = (order: OrderData, isAdmin: boolean = false) => {
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
             <!-- Header -->
             <div style="background: linear-gradient(135deg, #365314 0%, #4d7c0f 100%); padding: 30px; text-align: center;">
-                <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🦊 Foxtail Fashions</h1>
+                <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Foxtail Fashions</h1>
                 <p style="color: #bef264; margin: 10px 0 0 0; font-size: 14px;">Premium Fashion | Coimbatore</p>
             </div>
 
