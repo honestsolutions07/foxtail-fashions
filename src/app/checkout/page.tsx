@@ -193,6 +193,21 @@ export default function CheckoutPage() {
 
             const coupon = data;
 
+            // Check if FUFO coupon is being used by non-first-time customer
+            if (couponCode.toUpperCase() === 'FUFO') {
+                const { data: orderData } = await supabase
+                    .from('orders')
+                    .select('id')
+                    .eq('customer_email', formData.email)
+                    .limit(1);
+
+                if (orderData && orderData.length > 0) {
+                    setCouponError('FUFO coupon is only for first-time customers');
+                    setCouponLoading(false);
+                    return;
+                }
+            }
+
             // Validation
             if (!coupon.is_active) {
                 setCouponError('This coupon is no longer active');
