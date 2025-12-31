@@ -30,10 +30,12 @@ interface OrderData {
 }
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtpout.secureserver.net',
+    port: 465,
+    secure: true, // SSL
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.EMAIL_USER, // info@foxtailfashions.in
+        pass: process.env.EMAIL_PASS, // GoDaddy email password
     },
 });
 
