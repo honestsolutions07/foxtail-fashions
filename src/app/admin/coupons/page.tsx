@@ -3,10 +3,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Coupon } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
 
 export default function AdminCouponsPage() {
-    const router = useRouter();
     const [coupons, setCoupons] = useState<Coupon[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,16 +23,8 @@ export default function AdminCouponsPage() {
     });
 
     useEffect(() => {
-        checkUser();
         fetchCoupons();
     }, []);
-
-    const checkUser = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            router.push('/admin/login');
-        }
-    };
 
     const fetchCoupons = async () => {
         try {
@@ -165,9 +155,11 @@ export default function AdminCouponsPage() {
                                     <span className="font-bold text-gray-900">{coupon.code}</span>
                                 </td>
                                 <td>
-                                    {coupon.discount_type === 'percentage'
-                                        ? `${coupon.discount_value}% OFF`
-                                        : `₹${coupon.discount_value} OFF`}
+                                    {coupon.discount_type === 'free_delivery'
+                                        ? '🚚 Free Delivery'
+                                        : coupon.discount_type === 'percentage'
+                                            ? `${coupon.discount_value}% OFF`
+                                            : `₹${coupon.discount_value} OFF`}
                                 </td>
                                 <td>₹{coupon.min_order_value}</td>
                                 <td>
@@ -225,6 +217,7 @@ export default function AdminCouponsPage() {
                                     >
                                         <option value="fixed">Fixed Amount (₹)</option>
                                         <option value="percentage">Percentage (%)</option>
+                                        <option value="free_delivery">Free Delivery 🚚</option>
                                     </select>
                                 </div>
                                 <div className="form-group">

@@ -7,7 +7,7 @@ const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY || 
 export interface Coupon {
     id: string;
     code: string;
-    discount_type: 'percentage' | 'fixed';
+    discount_type: 'percentage' | 'fixed' | 'free_delivery';
     discount_value: number;
     min_order_value: number;
     max_discount_amount?: number;

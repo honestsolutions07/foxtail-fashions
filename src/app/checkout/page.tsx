@@ -178,11 +178,11 @@ export default function CheckoutPage() {
         try {
             const { supabase } = await import('@/lib/supabase');
 
-            // Fetch coupon
+            // Fetch coupon (case-insensitive by converting to uppercase)
             const { data, error } = await supabase
                 .from('coupons')
                 .select('*')
-                .eq('code', couponCode)
+                .eq('code', couponCode.toUpperCase().trim())
                 .single();
 
             if (error || !data) {
@@ -237,17 +237,22 @@ export default function CheckoutPage() {
 
             // Calculate Discount
             let discount = 0;
-            if (coupon.discount_type === 'fixed') {
+            if (coupon.discount_type === 'free_delivery') {
+                // Free delivery coupons don't give a monetary discount; they just set shipping to 0
+                discount = 0;
+            } else if (coupon.discount_type === 'fixed') {
                 discount = coupon.discount_value;
+                // For fixed coupons, cap at subtotal
+                discount = Math.min(discount, currentSubtotal);
             } else {
+                // Percentage discount only applies to subtotal
                 discount = (currentSubtotal * coupon.discount_value) / 100;
                 if (coupon.max_discount_amount) {
                     discount = Math.min(discount, coupon.max_discount_amount);
                 }
+                // Percentage discounts capped at subtotal
+                discount = Math.min(discount, currentSubtotal);
             }
-
-            // Ensure discount doesn't exceed subtotal
-            discount = Math.min(discount, currentSubtotal);
 
             setAppliedCoupon(coupon);
             setCouponDiscount(Math.floor(discount));
@@ -278,137 +283,87 @@ export default function CheckoutPage() {
             // Import supabase dynamically
             const { supabase } = await import('@/lib/supabase');
 
-            // Generate order ID
-            const orderId = 'ORD' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
-
-            // Prepare order items
-            const orderItems = cartItems.map(item => ({
-                product_id: item.productId,
-                product_name: item.name,
-                size: item.size,
-                quantity: item.quantity,
-                price: item.price,
-                image: item.image,
-                isCustom: item.isCustom || false,
-                customData: item.customData || null,
-            }));
-
-            // Calculate coins to be earned (1 coin per ₹100 spent on products, excluding shipping)
-            const coinsEarned = Math.floor(subtotal / 100);
+            // Calculate totals
             const actualCoinsRedeemed = useCoins ? coinsToRedeem : 0;
             const gstAmt = Math.round(subtotal * 0.05); // 5% GST
             const finalTotal = Math.max(0, subtotal + gstAmt + shipping - actualCoinsRedeemed - couponDiscount);
 
-            // Generate invoice number: INV-YYYYMMDD-RANDOM
+            // Generate order ID and invoice number early
+            const orderId = 'ORD' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
             const today = new Date();
             const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
             const invoiceNumber = `INV-${dateStr}-${orderId.slice(-6).toUpperCase()}`;
 
-            // Create order in Supabase
-            const { error } = await supabase.from('orders').insert({
-                id: orderId,
-                customer_name: formData.fullName,
-                customer_email: formData.email,
-                customer_phone: formData.phone,
-                shipping_address: formData.address,
-                city: formData.city,
-                state: formData.state,
-                pincode: formData.pincode,
-                landmark: formData.landmark || null,
-                items: orderItems,
-                subtotal: subtotal,
-                gst_amount: gstAmt,
-                invoice_number: invoiceNumber,
-                shipping: shipping,
-                total: finalTotal,
-                status: 'pending',
-                payment_status: 'pending',
-                coins_redeemed: actualCoinsRedeemed,
-                coins_earned: coinsEarned,
-                coins_credited: false,
-                coupon_code: appliedCoupon ? appliedCoupon.code : null,
-                discount_amount: couponDiscount,
+            // Step 1: Create Razorpay Order
+            const razorpayOrderResponse = await fetch('/api/razorpay/create-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: finalTotal,
+                    currency: 'INR',
+                    receipt: orderId,
+                }),
             });
 
-            if (error) {
-                console.error('Order creation error:', error);
-                throw error;
+            const razorpayOrderData = await razorpayOrderResponse.json();
+
+            if (!razorpayOrderResponse.ok || !razorpayOrderData.orderId) {
+                throw new Error('Failed to create payment order');
             }
 
-            // Decrement Stock for each item
-            for (const item of orderItems) {
-                if (item.product_id) {
+            // Step 2: Open Razorpay Checkout Modal
+            const options = {
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                amount: razorpayOrderData.amount,
+                currency: razorpayOrderData.currency,
+                name: 'Foxtail Fashions',
+                description: `Order ${orderId}`,
+                order_id: razorpayOrderData.orderId,
+                prefill: {
+                    name: formData.fullName,
+                    email: formData.email,
+                    contact: formData.phone,
+                },
+                theme: {
+                    color: '#e07a5f',
+                },
+                handler: async function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
+                    // Step 3: Verify Payment
                     try {
-                        await supabase.rpc('decrement_stock', {
-                            p_product_id: item.product_id,
-                            p_size: item.size,
-                            p_quantity: item.quantity
+                        const verifyResponse = await fetch('/api/razorpay/verify-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                            }),
                         });
-                    } catch (stockError) {
-                        console.error(`Failed to decrement stock for item ${item.product_name}:`, stockError);
-                    }
-                }
-            }
 
-            // If coins were redeemed, deduct from user's balance
-            if (actualCoinsRedeemed > 0 && user) {
-                try {
-                    // Update profile
-                    await supabase
-                        .from('profiles')
-                        .update({ fox_coins: userCoins - actualCoinsRedeemed })
-                        .eq('id', user.id);
+                        const verifyData = await verifyResponse.json();
 
-                    // Log transaction
-                    await supabase.from('coin_transactions').insert({
-                        user_id: user.id,
-                        amount: -actualCoinsRedeemed,
-                        type: 'redeemed',
-                        order_id: orderId,
-                        description: `Redeemed ${actualCoinsRedeemed} coins on order ${orderId}`,
-                    });
-                } catch (coinError) {
-                    console.error('Coin redemption error (non-blocking):', coinError);
-                }
-            }
+                        if (!verifyData.success) {
+                            alert('Payment verification failed. Please contact support.');
+                            setSubmitting(false);
+                            return;
+                        }
 
-            // Increment Coupon Usage
-            if (appliedCoupon) {
-                try {
-                    await supabase.rpc('increment_coupon_usage', { coupon_code: appliedCoupon.code });
-                } catch (couponError) {
-                    console.error('Coupon increment error (non-blocking):', couponError);
-                }
-            }
+                        // Step 4: Create Order in Supabase (Payment Verified!)
+                        const orderItems = cartItems.map(item => ({
+                            product_id: item.productId,
+                            product_name: item.name,
+                            size: item.size,
+                            quantity: item.quantity,
+                            price: item.price,
+                            image: item.image,
+                            isCustom: item.isCustom || false,
+                            customData: item.customData || null,
+                        }));
 
-            // Store order data for confirmation page
-            const lastOrder = {
-                orderId,
-                customer: formData,
-                items: cartItems.map(item => ({
-                    name: item.name,
-                    size: item.size,
-                    quantity: item.quantity,
-                    price: item.price,
-                    image: item.image,
-                })),
-                total,
-            };
-            localStorage.setItem('lastOrder', JSON.stringify(lastOrder));
+                        const coinsEarned = Math.floor(subtotal / 100);
 
-            // Clear cart
-            localStorage.setItem('cart', JSON.stringify([]));
-            window.dispatchEvent(new Event('cartUpdated'));
-
-            // Send order confirmation emails (non-blocking)
-            try {
-                await fetch('/api/send-order-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        order: {
+                        const { error } = await supabase.from('orders').insert({
                             id: orderId,
-                            invoice_number: invoiceNumber,
                             customer_name: formData.fullName,
                             customer_email: formData.email,
                             customer_phone: formData.phone,
@@ -416,34 +371,165 @@ export default function CheckoutPage() {
                             city: formData.city,
                             state: formData.state,
                             pincode: formData.pincode,
+                            landmark: formData.landmark || null,
                             items: orderItems,
                             subtotal: subtotal,
                             gst_amount: gstAmt,
+                            invoice_number: invoiceNumber,
                             shipping: shipping,
-                            discount_amount: couponDiscount,
-                            coupon_code: appliedCoupon?.code,
-                            coins_redeemed: actualCoinsRedeemed,
                             total: finalTotal,
-                            created_at: new Date().toISOString(),
-                        }
-                    }),
-                });
-            } catch (emailError) {
-                console.error('Email sending error (non-blocking):', emailError);
-            }
+                            status: 'confirmed',
+                            payment_status: 'paid',
+                            payment_id: response.razorpay_payment_id,
+                            coins_redeemed: actualCoinsRedeemed,
+                            coins_earned: coinsEarned,
+                            coins_credited: false,
+                            coupon_code: appliedCoupon ? appliedCoupon.code : null,
+                            discount_amount: couponDiscount,
+                        });
 
-            // Navigate to confirmation page
-            router.push('/order-confirmation');
+                        if (error) {
+                            console.error('Order creation error:', error);
+                            alert('Payment successful but order creation failed. Please contact support with your payment ID: ' + response.razorpay_payment_id);
+                            setSubmitting(false);
+                            return;
+                        }
+
+                        // Decrement Stock for each item
+                        for (const item of orderItems) {
+                            if (item.product_id) {
+                                try {
+                                    await supabase.rpc('decrement_stock', {
+                                        p_product_id: item.product_id,
+                                        p_size: item.size,
+                                        p_quantity: item.quantity
+                                    });
+                                } catch (stockError) {
+                                    console.error(`Failed to decrement stock for item ${item.product_name}:`, stockError);
+                                }
+                            }
+                        }
+
+                        // If coins were redeemed, deduct from user's balance
+                        if (actualCoinsRedeemed > 0 && user) {
+                            try {
+                                await supabase
+                                    .from('profiles')
+                                    .update({ fox_coins: userCoins - actualCoinsRedeemed })
+                                    .eq('id', user.id);
+
+                                await supabase.from('coin_transactions').insert({
+                                    user_id: user.id,
+                                    amount: -actualCoinsRedeemed,
+                                    type: 'redeemed',
+                                    order_id: orderId,
+                                    description: `Redeemed ${actualCoinsRedeemed} coins on order ${orderId}`,
+                                });
+                            } catch (coinError) {
+                                console.error('Coin redemption error (non-blocking):', coinError);
+                            }
+                        }
+
+                        // Increment Coupon Usage
+                        if (appliedCoupon) {
+                            try {
+                                await supabase.rpc('increment_coupon_usage', { coupon_code: appliedCoupon.code });
+                            } catch (couponError) {
+                                console.error('Coupon increment error (non-blocking):', couponError);
+                            }
+                        }
+
+                        // Store order data for confirmation page
+                        const lastOrder = {
+                            orderId,
+                            customer: formData,
+                            items: cartItems.map(item => ({
+                                name: item.name,
+                                size: item.size,
+                                quantity: item.quantity,
+                                price: item.price,
+                                image: item.image,
+                            })),
+                            total: finalTotal,
+                        };
+                        localStorage.setItem('lastOrder', JSON.stringify(lastOrder));
+
+                        // Clear cart
+                        localStorage.setItem('cart', JSON.stringify([]));
+                        window.dispatchEvent(new Event('cartUpdated'));
+
+                        // Send order confirmation emails (non-blocking)
+                        try {
+                            fetch('/api/send-order-email', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    order: {
+                                        id: orderId,
+                                        invoice_number: invoiceNumber,
+                                        customer_name: formData.fullName,
+                                        customer_email: formData.email,
+                                        customer_phone: formData.phone,
+                                        shipping_address: formData.address,
+                                        city: formData.city,
+                                        state: formData.state,
+                                        pincode: formData.pincode,
+                                        items: orderItems,
+                                        subtotal: subtotal,
+                                        gst_amount: gstAmt,
+                                        shipping: shipping,
+                                        discount_amount: couponDiscount,
+                                        coupon_code: appliedCoupon?.code,
+                                        coins_redeemed: actualCoinsRedeemed,
+                                        total: finalTotal,
+                                        created_at: new Date().toISOString(),
+                                    }
+                                }),
+                            });
+                        } catch (emailError) {
+                            console.error('Email sending error (non-blocking):', emailError);
+                        }
+
+                        // Navigate to confirmation page
+                        router.push('/order-confirmation');
+                    } catch (verifyError) {
+                        console.error('Payment verification error:', verifyError);
+                        alert('Payment verification failed. Please contact support.');
+                        setSubmitting(false);
+                    }
+                },
+                modal: {
+                    ondismiss: function () {
+                        setSubmitting(false);
+                    },
+                },
+            };
+
+            // Load Razorpay script if not already loaded
+            if (typeof window !== 'undefined' && !(window as any).Razorpay) {
+                const script = document.createElement('script');
+                script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                script.async = true;
+                script.onload = () => {
+                    const rzp = new (window as any).Razorpay(options);
+                    rzp.open();
+                };
+                document.body.appendChild(script);
+            } else {
+                const rzp = new (window as any).Razorpay(options);
+                rzp.open();
+            }
         } catch (error) {
-            console.error('Error placing order:', error);
-            alert('Failed to place order. Please try again.');
+            console.error('Error initiating payment:', error);
+            alert('Failed to initiate payment. Please try again.');
             setSubmitting(false);
         }
     };
 
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const gstAmount = Math.round(subtotal * 0.05); // 5% GST
-    const shipping = subtotal > 899 ? 0 : 99;
+    // Free delivery if subtotal > 899 OR if a free_delivery coupon is applied
+    const shipping = (subtotal > 899 || appliedCoupon?.discount_type === 'free_delivery') ? 0 : 99;
     const coinsDiscount = useCoins ? coinsToRedeem : 0;
     const total = Math.max(0, subtotal + gstAmount + shipping - coinsDiscount - couponDiscount);
     const coinsToEarn = Math.floor(subtotal / 100); // 1 coin per ₹100
