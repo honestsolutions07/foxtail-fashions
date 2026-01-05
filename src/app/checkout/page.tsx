@@ -90,7 +90,7 @@ export default function CheckoutPage() {
         }
     }, [user]);
 
-    // Sync isFreeDelivery when appliedCoupon changes
+    // Sync isFreeDelivery when appliedCoupon changes (handles login state changes)
     useEffect(() => {
         if (appliedCoupon?.discount_type === 'free_delivery') {
             setIsFreeDelivery(true);
