@@ -16,17 +16,26 @@ export default function AdminLayout({
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
-        const auth = localStorage.getItem('adminAuth');
-        if (auth === 'true') {
-            setIsAuthenticated(true);
-        } else if (pathname !== '/admin/login') {
-            router.push('/admin/login');
-        }
-        setIsLoading(false);
+        const checkAuth = async () => {
+            const { supabase } = await import('@/lib/supabase');
+            const { data: { session } } = await supabase.auth.getSession();
+            const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
+            if (session?.user?.email && adminEmail && session.user.email.toLowerCase() === adminEmail.toLowerCase()) {
+                setIsAuthenticated(true);
+            } else {
+                router.push('/admin/login');
+            }
+            setIsLoading(false);
+        };
+
+        checkAuth();
     }, [pathname, router]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('adminAuth');
+    const handleLogout = async () => {
+        const { supabase } = await import('@/lib/supabase');
+        await supabase.auth.signOut();
+        setIsAuthenticated(false);
         router.push('/admin/login');
     };
 

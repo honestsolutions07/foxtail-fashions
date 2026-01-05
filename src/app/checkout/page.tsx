@@ -374,7 +374,7 @@ export default function CheckoutPage() {
 
                         const coinsEarned = Math.floor(subtotal / 100);
 
-                        const { error } = await supabase.from('orders').insert({
+                        const orderPayload = {
                             id: orderId,
                             customer_name: formData.fullName,
                             customer_email: formData.email,
@@ -392,17 +392,24 @@ export default function CheckoutPage() {
                             total: finalTotal,
                             status: 'confirmed',
                             payment_status: 'paid',
-                            payment_id: response.razorpay_payment_id,
+                            payment_id: response.razorpay_payment_id, // Keeping this to test if column exists
                             coins_redeemed: actualCoinsRedeemed,
                             coins_earned: coinsEarned,
                             coins_credited: false,
                             coupon_code: appliedCoupon ? appliedCoupon.code : null,
                             discount_amount: couponDiscount,
-                        });
+                        };
+
+                        console.log('Attempting to insert Order:', orderPayload);
+
+                        const { error } = await supabase.from('orders').insert(orderPayload);
 
                         if (error) {
-                            console.error('Order creation error:', error);
-                            alert('Order creation failed: ' + (error.message || JSON.stringify(error)) + '. Pmt ID: ' + response.razorpay_payment_id);
+                            console.error('Order creation error FULL:', error);
+                            console.error('Error Message:', error.message);
+                            console.error('Error Details:', error.details);
+                            console.error('Error Hint:', error.hint);
+                            alert('Order creation failed: ' + (error.message || 'Unknown error') + '\nDetails: ' + (error.details || 'None'));
                             setSubmitting(false);
                             return;
                         }
