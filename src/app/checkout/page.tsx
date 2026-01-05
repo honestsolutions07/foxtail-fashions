@@ -90,6 +90,15 @@ export default function CheckoutPage() {
         }
     }, [user]);
 
+    // Sync isFreeDelivery when appliedCoupon changes
+    useEffect(() => {
+        if (appliedCoupon?.discount_type === 'free_delivery') {
+            setIsFreeDelivery(true);
+        } else {
+            setIsFreeDelivery(false);
+        }
+    }, [appliedCoupon]);
+
     const fetchUserCoins = async (userId: string) => {
         try {
             const { supabase } = await import('@/lib/supabase');
@@ -835,7 +844,8 @@ export default function CheckoutPage() {
                                 {couponError && <p className="coupon-message error">{couponError}</p>}
                                 {appliedCoupon && (
                                     <p className="coupon-message success">
-                                        Coupon applied! You saved ₹{couponDiscount}
+                                        Coupon applied! You saved ₹{isFreeDelivery ? 99 : couponDiscount}
+                                        {isFreeDelivery && ' on delivery'}
                                     </p>
                                 )}
                             </div>
@@ -868,8 +878,8 @@ export default function CheckoutPage() {
 
                             {appliedCoupon && (
                                 <div className="checkout-summary-row coupon-discount">
-                                    <span>🎟️ Coupon Discount ({appliedCoupon.code})</span>
-                                    <span>-₹{couponDiscount}</span>
+                                    <span>🎟️ {isFreeDelivery ? 'Free Delivery' : `Coupon Discount`} ({appliedCoupon.code})</span>
+                                    <span>-₹{isFreeDelivery ? 99 : couponDiscount}</span>
                                 </div>
                             )}
 
