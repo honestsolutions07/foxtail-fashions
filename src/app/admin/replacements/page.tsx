@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 interface ReplacementRequest {
@@ -28,7 +27,6 @@ interface Order {
 }
 
 export default function AdminReplacementsPage() {
-    const router = useRouter();
     const [requests, setRequests] = useState<ReplacementRequest[]>([]);
     const [orders, setOrders] = useState<{ [id: string]: Order }>({});
     const [loading, setLoading] = useState(true);
@@ -38,16 +36,8 @@ export default function AdminReplacementsPage() {
     const [updating, setUpdating] = useState(false);
 
     useEffect(() => {
-        checkAuth();
         fetchRequests();
     }, []);
-
-    const checkAuth = () => {
-        const auth = localStorage.getItem('adminAuth');
-        if (auth !== 'true') {
-            router.push('/admin/login');
-        }
-    };
 
     const fetchRequests = async () => {
         try {
