@@ -70,6 +70,7 @@ export default function CheckoutPage() {
     const [couponError, setCouponError] = useState('');
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponDiscount, setCouponDiscount] = useState(0);
+    const [isFreeDelivery, setIsFreeDelivery] = useState(false);
     const [isFirstOrder, setIsFirstOrder] = useState(false);
 
     useEffect(() => {
@@ -256,6 +257,7 @@ export default function CheckoutPage() {
 
             setAppliedCoupon(coupon);
             setCouponDiscount(Math.floor(discount));
+            setIsFreeDelivery(coupon.discount_type === 'free_delivery');
             setCouponError('');
         } catch (error) {
             console.error('Error applying coupon:', error);
@@ -270,6 +272,7 @@ export default function CheckoutPage() {
         setCouponDiscount(0);
         setCouponCode('');
         setCouponError('');
+        setIsFreeDelivery(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -529,7 +532,7 @@ export default function CheckoutPage() {
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const gstAmount = Math.round(subtotal * 0.05); // 5% GST
     // Free delivery if subtotal > 899 OR if a free_delivery coupon is applied
-    const shipping = (subtotal > 899 || appliedCoupon?.discount_type === 'free_delivery') ? 0 : 99;
+    const shipping = (subtotal > 899 || isFreeDelivery) ? 0 : 99;
     const coinsDiscount = useCoins ? coinsToRedeem : 0;
     const total = Math.max(0, subtotal + gstAmount + shipping - coinsDiscount - couponDiscount);
     const coinsToEarn = Math.floor(subtotal / 100); // 1 coin per ₹100
