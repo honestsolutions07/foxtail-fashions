@@ -41,7 +41,14 @@ const indianStates = [
 
 export default function CheckoutPage() {
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
+
+    useEffect(() => {
+        if (!authLoading && !user) {
+            alert('Please login to checkout');
+            router.push('/login');
+        }
+    }, [user, authLoading, router]);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);

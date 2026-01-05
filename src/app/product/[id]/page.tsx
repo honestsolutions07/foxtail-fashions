@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -12,6 +12,7 @@ const availableSizes = ['S', 'M', 'L', 'XL', 'XXL'];
 
 export default function ProductPage() {
     const params = useParams();
+    const router = useRouter();
     const productId = params.id as string;
 
     const [product, setProduct] = useState<Product | null>(null);
@@ -21,11 +22,18 @@ export default function ProductPage() {
     const [isWishlisted, setIsWishlisted] = useState(false);
     const [addedToCart, setAddedToCart] = useState(false);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+    const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
         fetchProduct();
         checkWishlist();
+        checkUser();
     }, [productId]);
+
+    const checkUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+    };
 
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
@@ -76,6 +84,12 @@ export default function ProductPage() {
     };
 
     const addToCart = () => {
+        if (!user) {
+            alert('Please login to add items to cart');
+            router.push('/login');
+            return;
+        }
+
         if (!product) return;
 
         // Check stock for accessories
