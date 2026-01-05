@@ -402,7 +402,7 @@ export default function CheckoutPage() {
 
                         if (error) {
                             console.error('Order creation error:', error);
-                            alert('Payment successful but order creation failed. Please contact support with your payment ID: ' + response.razorpay_payment_id);
+                            alert('Order creation failed: ' + (error.message || JSON.stringify(error)) + '. Pmt ID: ' + response.razorpay_payment_id);
                             setSubmitting(false);
                             return;
                         }

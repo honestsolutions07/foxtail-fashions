@@ -90,6 +90,9 @@ export interface Order {
     coins_earned?: number;
     coins_credited?: boolean;
     payment_method?: string;
+    payment_id?: string;
+    invoice_number?: string;
+    gst_amount?: number;
     created_at: string;
 }
 
