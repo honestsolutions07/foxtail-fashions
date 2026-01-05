@@ -12,10 +12,15 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Check if SECRET is configured
+        if (!process.env.RAZORPAY_KEY_SECRET) {
+            throw new Error('Razorpay secret is not configured');
+        }
+
         // Create the expected signature
         const body = razorpay_order_id + '|' + razorpay_payment_id;
         const expectedSignature = crypto
-            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
             .update(body)
             .digest('hex');
 

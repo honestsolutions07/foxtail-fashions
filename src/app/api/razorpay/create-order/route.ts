@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID!,
-    key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+// Initialize Razorpay only if keys are present (prevents build errors)
+const razorpay = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET
+    ? new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET,
+    })
+    : null;
 
 export async function POST(request: NextRequest) {
     try {
@@ -25,6 +28,10 @@ export async function POST(request: NextRequest) {
             currency,
             receipt: receipt || `receipt_${Date.now()}`,
         };
+
+        if (!razorpay) {
+            throw new Error('Razorpay keys are not configured');
+        }
 
         const order = await razorpay.orders.create(options);
 
