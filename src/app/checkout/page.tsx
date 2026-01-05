@@ -335,6 +335,21 @@ export default function CheckoutPage() {
                 throw error;
             }
 
+            // Decrement Stock for each item
+            for (const item of orderItems) {
+                if (item.product_id) {
+                    try {
+                        await supabase.rpc('decrement_stock', {
+                            p_product_id: item.product_id,
+                            p_size: item.size,
+                            p_quantity: item.quantity
+                        });
+                    } catch (stockError) {
+                        console.error(`Failed to decrement stock for item ${item.product_name}:`, stockError);
+                    }
+                }
+            }
+
             // If coins were redeemed, deduct from user's balance
             if (actualCoinsRedeemed > 0 && user) {
                 try {

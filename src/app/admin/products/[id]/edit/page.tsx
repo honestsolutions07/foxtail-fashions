@@ -30,6 +30,10 @@ export default function EditProductPage() {
         description: '',
     });
 
+    const [selectedSizes, setSelectedSizes] = useState<{ [key: string]: number }>({});
+
+    const availableSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+
     useEffect(() => {
         fetchCategories();
         fetchProduct();
@@ -72,6 +76,7 @@ export default function EditProductPage() {
                     image: product.image,
                     description: product.description || '',
                 });
+                setSelectedSizes(product.sizes || {});
             }
         } catch (error) {
             console.error('Error fetching product:', error);
@@ -103,8 +108,31 @@ export default function EditProductPage() {
         }
     };
 
+    const toggleSize = (size: string) => {
+        setSelectedSizes(prev => {
+            if (prev[size] !== undefined) {
+                const { [size]: removed, ...rest } = prev;
+                return rest;
+            }
+            return { ...prev, [size]: 10 };
+        });
+    };
+
+    const updateSizeQuantity = (size: string, quantity: number) => {
+        setSelectedSizes(prev => ({
+            ...prev,
+            [size]: Math.max(0, quantity)
+        }));
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (Object.keys(selectedSizes).length === 0) {
+            alert(formData.category === 'accessories' ? 'Please enter stock quantity' : 'Please select at least one size');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -117,6 +145,8 @@ export default function EditProductPage() {
                     subcategory: formData.subcategory,
                     image: formData.image,
                     description: formData.description,
+                    size_mode: 'select',
+                    sizes: selectedSizes,
                 })
                 .eq('id', productId);
 
@@ -229,6 +259,78 @@ export default function EditProductPage() {
                             onChange={handleChange}
                             placeholder="https://example.com/image.jpg"
                         />
+                    </div>
+
+                    {/* Size Options Section */}
+                    <div className="admin-form-group full-width">
+                        <label>
+                            {formData.category === 'accessories' ? 'Stock Quantity *' : 'Size Availability *'}
+                        </label>
+
+                        {formData.category === 'accessories' ? (
+                            <div className="admin-size-quantity">
+                                <button
+                                    type="button"
+                                    onClick={() => updateSizeQuantity('One Size', (selectedSizes['One Size'] || 0) - 1)}
+                                >
+                                    −
+                                </button>
+                                <input
+                                    type="number"
+                                    value={selectedSizes['One Size'] || 0}
+                                    onChange={(e) => updateSizeQuantity('One Size', parseInt(e.target.value) || 0)}
+                                    min="0"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => updateSizeQuantity('One Size', (selectedSizes['One Size'] || 0) + 1)}
+                                >
+                                    +
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <p className="admin-size-note" style={{ marginBottom: '10px' }}>
+                                    Enter quantity for each size. Set to 0 if out of stock.
+                                </p>
+
+                                <div className="admin-sizes-grid">
+                                    {availableSizes.map(size => (
+                                        <div key={size} className="admin-size-item">
+                                            <button
+                                                type="button"
+                                                className={`admin-size-toggle ${selectedSizes[size] !== undefined ? 'active' : ''}`}
+                                                onClick={() => toggleSize(size)}
+                                            >
+                                                {size}
+                                            </button>
+                                            {selectedSizes[size] !== undefined && (
+                                                <div className="admin-size-quantity">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => updateSizeQuantity(size, selectedSizes[size] - 1)}
+                                                    >
+                                                        −
+                                                    </button>
+                                                    <input
+                                                        type="number"
+                                                        value={selectedSizes[size]}
+                                                        onChange={(e) => updateSizeQuantity(size, parseInt(e.target.value) || 0)}
+                                                        min="0"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => updateSizeQuantity(size, selectedSizes[size] + 1)}
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     <div className="admin-form-group full-width">

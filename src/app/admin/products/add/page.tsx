@@ -23,7 +23,6 @@ export default function AddProductPage() {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [images, setImages] = useState<string[]>([]);
-    const [sizeMode, setSizeMode] = useState<'all' | 'select'>('all');
     const [selectedSizes, setSelectedSizes] = useState<SizeQuantity>({});
 
     // Categories from database
@@ -160,8 +159,8 @@ export default function AddProductPage() {
             return;
         }
 
-        if (sizeMode === 'select' && Object.keys(selectedSizes).length === 0) {
-            alert('Please select at least one size');
+        if (Object.keys(selectedSizes).length === 0) {
+            alert(formData.category === 'accessories' ? 'Please enter stock quantity' : 'Please select at least one size');
             return;
         }
 
@@ -178,8 +177,8 @@ export default function AddProductPage() {
                     description: formData.description,
                     images: images,
                     image: images[0], // Keep first image as main
-                    size_mode: sizeMode,
-                    sizes: sizeMode === 'all' ? {} : selectedSizes,
+                    size_mode: 'select',
+                    sizes: selectedSizes,
                 }]);
 
             if (error) throw error;
@@ -316,28 +315,39 @@ export default function AddProductPage() {
                         </div>
                     </div>
 
-                    {/* Size Options Section - Only for clothing categories */}
-                    {formData.category !== 'accessories' && (
-                        <div className="admin-form-group full-width">
-                            <label>Size Availability *</label>
-                            <div className="admin-size-mode">
+                    {/* Size Options Section */}
+                    <div className="admin-form-group full-width">
+                        <label>
+                            {formData.category === 'accessories' ? 'Stock Quantity *' : 'Size Availability *'}
+                        </label>
+
+                        {formData.category === 'accessories' ? (
+                            <div className="admin-size-quantity">
                                 <button
                                     type="button"
-                                    className={`admin-size-mode-btn ${sizeMode === 'all' ? 'active' : ''}`}
-                                    onClick={() => setSizeMode('all')}
+                                    onClick={() => updateSizeQuantity('One Size', (selectedSizes['One Size'] || 0) - 1)}
                                 >
-                                    ✓ Available in All Sizes
+                                    −
                                 </button>
+                                <input
+                                    type="number"
+                                    value={selectedSizes['One Size'] || 0}
+                                    onChange={(e) => updateSizeQuantity('One Size', parseInt(e.target.value) || 0)}
+                                    min="0"
+                                />
                                 <button
                                     type="button"
-                                    className={`admin-size-mode-btn ${sizeMode === 'select' ? 'active' : ''}`}
-                                    onClick={() => setSizeMode('select')}
+                                    onClick={() => updateSizeQuantity('One Size', (selectedSizes['One Size'] || 0) + 1)}
                                 >
-                                    📏 Select Specific Sizes
+                                    +
                                 </button>
                             </div>
+                        ) : (
+                            <>
+                                <p className="admin-size-note" style={{ marginBottom: '10px' }}>
+                                    Enter quantity for each size. Set to 0 if out of stock.
+                                </p>
 
-                            {sizeMode === 'select' && (
                                 <div className="admin-sizes-grid">
                                     {availableSizes.map(size => (
                                         <div key={size} className="admin-size-item">
@@ -373,15 +383,9 @@ export default function AddProductPage() {
                                         </div>
                                     ))}
                                 </div>
-                            )}
-
-                            {sizeMode === 'all' && (
-                                <p className="admin-size-note">
-                                    ℹ️ Product will be available in all sizes without quantity restrictions
-                                </p>
-                            )}
-                        </div>
-                    )}
+                            </>
+                        )}
+                    </div>
 
                     <div className="admin-form-group full-width">
                         <label htmlFor="description">Description</label>

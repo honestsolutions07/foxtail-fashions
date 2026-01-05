@@ -78,19 +78,33 @@ export default function ProductPage() {
     const addToCart = () => {
         if (!product) return;
 
-        // Skip size check for accessories
+        // Check stock for accessories
         const isAccessory = product.category?.toLowerCase() === 'accessories';
-        if (!isAccessory && !selectedSize) {
+
+        if (isAccessory) {
+            // Default to 'One Size' for accessories
+            const stock = product.sizes?.['One Size'] ?? 0;
+            if (stock <= 0) {
+                alert('This item is out of stock');
+                return;
+            }
+        } else if (!selectedSize) {
             alert('Please select a size');
             return;
         }
 
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
         const existingItem = cart.find((item: any) =>
-            item.productId === productId && item.size === selectedSize
+            item.productId === productId && item.size === (selectedSize || 'One Size')
         );
 
+        const currentStock = isAccessory ? (product.sizes?.['One Size'] ?? 0) : ((product.sizes as any)?.[selectedSize!] ?? 0);
+
         if (existingItem) {
+            if (existingItem.quantity >= currentStock) {
+                alert(`Sorry, you can't add more of this item. Only ${currentStock} left.`);
+                return;
+            }
             existingItem.quantity += 1;
         } else {
             cart.push({
@@ -239,8 +253,8 @@ export default function ProductPage() {
                                     <p>{product.description}</p>
                                 </div>
                             )}
-                            {/* Size selection - hide for accessories */}
-                            {product.category?.toLowerCase() !== 'accessories' && (
+                            {/* Size selection */}
+                            {product.category?.toLowerCase() !== 'accessories' ? (
                                 <div className="product-sizes">
                                     <div className="product-sizes-header">
                                         <h3>Select Size</h3>
@@ -258,6 +272,28 @@ export default function ProductPage() {
                                             );
                                         })}
                                     </div>
+                                </div>
+                            ) : (
+                                <div className="product-stock-status" style={{ marginBottom: '20px' }}>
+                                    {(() => {
+                                        const quantity = product.sizes?.['One Size'] ?? 0;
+                                        if (quantity === 0) {
+                                            return <div style={{ color: '#ef4444', fontWeight: '600', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                Out of Stock
+                                            </div>;
+                                        } else if (quantity < 5) {
+                                            return <div style={{ color: '#d97706', fontWeight: '600', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                Hurry! Only {quantity} left
+                                            </div>;
+                                        } else {
+                                            return <div style={{ color: '#059669', fontWeight: '600', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                In Stock
+                                            </div>;
+                                        }
+                                    })()}
                                 </div>
                             )}
                             <div className="product-actions">
