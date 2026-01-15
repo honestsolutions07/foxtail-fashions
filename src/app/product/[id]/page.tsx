@@ -8,7 +8,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabase, Product } from '@/lib/supabase';
 
-const availableSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL'];
 
 export default function ProductPage() {
     const params = useParams();

@@ -11,7 +11,7 @@ interface Category {
     subcategories: string[];
 }
 
-const availableSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL', '6XL'];
 
 interface SizeQuantity {
     [key: string]: number;
