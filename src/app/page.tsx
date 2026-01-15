@@ -19,7 +19,7 @@ export default function Home() {
         <FeaturesSection />
         <FAQSection />
         {/* <NewsletterSection /> */}
-        <FirstOrderPopup />
+        {/* <FirstOrderPopup /> */} {/* Removed FUFO popup */}
       </main>
       <Footer />
     </div>
