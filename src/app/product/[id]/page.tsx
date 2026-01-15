@@ -138,9 +138,17 @@ export default function ProductPage() {
 
     const getSizes = () => {
         if (!product) return [];
+        // If all sizes mode, return the full ordered list
         if (product.size_mode === 'all') return availableSizes;
+
+        // Get sizes from product and filter to only available ones
         if (product.sizes && typeof product.sizes === 'object') {
-            return Object.keys(product.sizes);
+            const productSizes = product.sizes as Record<string, number>;
+            // Filter to only sizes with quantity > 0, maintaining the correct order
+            return availableSizes.filter(size => {
+                const qty = productSizes[size];
+                return qty !== undefined && qty > 0;
+            });
         }
         return availableSizes;
     };
@@ -275,16 +283,25 @@ export default function ProductPage() {
                                         {product.size_mode === 'all' && <span className="size-availability">Available in all sizes</span>}
                                     </div>
                                     <div className="product-sizes-grid">
-                                        {getSizes().map(size => {
-                                            const quantity = getSizeQuantity(size);
-                                            const isOutOfStock = quantity !== null && quantity === 0;
-                                            return (
-                                                <button key={size} className={`product-size-btn ${selectedSize === size ? 'active' : ''} ${isOutOfStock ? 'out-of-stock' : ''}`} onClick={() => !isOutOfStock && setSelectedSize(size)} disabled={isOutOfStock}>
-                                                    {size}
-                                                    {quantity !== null && quantity > 0 && quantity < 5 && <span className="size-low-stock">Only {quantity} left</span>}
-                                                </button>
-                                            );
-                                        })}
+                                        {getSizes().length > 0 ? (
+                                            getSizes().map(size => {
+                                                const quantity = getSizeQuantity(size);
+                                                return (
+                                                    <button
+                                                        key={size}
+                                                        className={`product-size-btn ${selectedSize === size ? 'active' : ''}`}
+                                                        onClick={() => setSelectedSize(size)}
+                                                    >
+                                                        {size}
+                                                        {quantity !== null && quantity > 0 && quantity < 5 && (
+                                                            <span className="size-low-stock">Only {quantity} left</span>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })
+                                        ) : (
+                                            <p style={{ color: '#ef4444', fontWeight: '500' }}>Currently out of stock</p>
+                                        )}
                                     </div>
                                 </div>
                             ) : (
