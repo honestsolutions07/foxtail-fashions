@@ -170,6 +170,22 @@ export default function CartPage() {
                                     </p>
                                 )}
 
+                                {/* First Order Hint */}
+                                <div style={{
+                                    background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                                    padding: '12px 16px',
+                                    borderRadius: '8px',
+                                    marginTop: '12px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}>
+                                    <span style={{ fontSize: '18px' }}>🎁</span>
+                                    <p style={{ margin: 0, fontSize: '13px', color: '#92400e', fontWeight: '500' }}>
+                                        First order? Use code <span style={{ fontWeight: '700', background: '#fff', padding: '2px 6px', borderRadius: '4px' }}>FOFA</span> for FREE shipping above ₹499!
+                                    </p>
+                                </div>
+
                                 <div className="cart-summary-divider"></div>
 
                                 <div className="cart-summary-row cart-total">
