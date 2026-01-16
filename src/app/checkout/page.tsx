@@ -210,8 +210,8 @@ export default function CheckoutPage() {
 
             const coupon = data;
 
-            // Check if FUFO coupon is being used by non-first-time customer
-            if (couponCode.toUpperCase() === 'FUFO') {
+            // Check if FOFA coupon is being used by non-first-time customer
+            if (couponCode.toUpperCase() === 'FOFA') {
                 const { data: orderData } = await supabase
                     .from('orders')
                     .select('id')
@@ -219,7 +219,7 @@ export default function CheckoutPage() {
                     .limit(1);
 
                 if (orderData && orderData.length > 0) {
-                    setCouponError('FUFO coupon is only for first-time customers');
+                    setCouponError('FOFA coupon is only for first-time customers');
                     setCouponLoading(false);
                     return;
                 }
@@ -804,7 +804,7 @@ export default function CheckoutPage() {
                             <div className="coupon-section">
                                 <h3>Promo Code</h3>
 
-                                {/* First Order FUFO Banner */}
+                                {/* First Order FOFA Banner */}
                                 {isFirstOrder && !appliedCoupon && (
                                     <div style={{
                                         background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
@@ -826,7 +826,7 @@ export default function CheckoutPage() {
                                                     borderRadius: '4px',
                                                     fontFamily: 'monospace',
                                                     letterSpacing: '1px'
-                                                }}>FUFO</span> for FREE Delivery!
+                                                }}>FOFA</span> for FREE Delivery!
                                             </p>
                                         </div>
                                     </div>
