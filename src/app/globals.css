@@ -41,6 +41,120 @@ h6 {
   line-height: 1.2;
 }
 
+/* ==================== */
+/* RESPONSIVE TYPOGRAPHY */
+/* ==================== */
+
+/* Hero Title - Large heading */
+.hero-title {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+@media (min-width: 640px) {
+  .hero-title {
+    font-size: 40px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: 48px;
+  }
+}
+
+/* Section Title - Medium heading */
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+  .section-title {
+    font-size: 28px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-title {
+    font-size: 36px;
+  }
+}
+
+/* Subsection Title */
+.subsection-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+@media (min-width: 640px) {
+  .subsection-title {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .subsection-title {
+    font-size: 28px;
+  }
+}
+
+/* Brand Name */
+.brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+@media (min-width: 640px) {
+  .brand-name {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .brand-name {
+    font-size: 20px;
+  }
+}
+
+/* Body text responsive */
+.body-text {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+@media (min-width: 640px) {
+  .body-text {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .body-text {
+    font-size: 16px;
+  }
+}
+
+/* Small text */
+.small-text {
+  font-size: 12px;
+}
+
+@media (min-width: 640px) {
+  .small-text {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .small-text {
+    font-size: 14px;
+  }
+}
+
 /* Container */
 .container {
   width: 100%;

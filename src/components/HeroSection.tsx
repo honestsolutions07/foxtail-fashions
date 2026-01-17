@@ -32,7 +32,7 @@ const HeroSection = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
                         {/* Heading */}
                         <div>
-                            <h1 style={{ fontSize: '48px', fontWeight: '700', lineHeight: '1.1' }}>
+                            <h1 className="hero-title">
                                 Redefine Your
                                 <br />
                                 <span style={{ position: 'relative', display: 'inline-block' }}>
@@ -59,7 +59,7 @@ const HeroSection = () => {
                         )}
 
                         {/* Description */}
-                        <p className="text-muted" style={{ fontSize: '16px', maxWidth: '420px', lineHeight: '1.7' }}>
+                        <p className="text-muted body-text" style={{ maxWidth: '420px' }}>
                             Discover the perfect blend of comfort and elegance. Our curated collection brings you the latest trends in fashion.
                         </p>
 

@@ -105,7 +105,7 @@ const Header = () => {
             height={20}
             style={{ objectFit: 'contain' }}
           />
-          <span style={{ fontSize: '20px', fontWeight: '700', letterSpacing: '-0.5px' }}>Foxtail Fashions</span>
+          <span className="brand-name">Foxtail Fashions</span>
         </Link>
 
         {/* Desktop Navigation */}

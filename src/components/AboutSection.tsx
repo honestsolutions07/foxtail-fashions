@@ -18,8 +18,8 @@ const AboutSection = () => {
                             />
                             {/* Floating Card */}
                             <div className="glass-card" style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px' }}>
-                                <p style={{ fontSize: '28px', fontWeight: '700', fontStyle: 'italic', marginBottom: '8px' }}>FOXTAIL FASHIONS</p>
-                                <div style={{ display: 'flex', gap: '16px', fontSize: '13px' }}>
+                                <p className="subsection-title" style={{ fontStyle: 'italic', marginBottom: '8px' }}>FOXTAIL FASHIONS</p>
+                                <div className="small-text" style={{ display: 'flex', gap: '16px' }}>
                                     <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <span style={{ width: '8px', height: '8px', background: '#a3e635', borderRadius: '50%' }}></span>
                                         Premium Quality
@@ -64,7 +64,7 @@ const AboutSection = () => {
                             </h2>
                         </div>
 
-                        <p className="text-muted" style={{ fontSize: '16px', lineHeight: '1.8' }}>
+                        <p className="text-muted body-text" style={{ lineHeight: '1.8' }}>
                             We believe in creating timeless pieces that transcend seasons. Our commitment to quality craftsmanship and sustainable practices ensures every piece tells a story of excellence.
                         </p>
 

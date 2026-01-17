@@ -28,8 +28,8 @@ const FeaturesSection = () => {
                     {/* Content Side */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                         <div>
-                            <p style={{ color: '#c8ff00', fontWeight: '600', fontSize: '14px', marginBottom: '12px', textTransform: 'uppercase' }}>WHY CHOOSE US</p>
-                            <h2 style={{ fontSize: '36px', fontWeight: '700', lineHeight: '1.2' }}>
+                            <p className="small-text" style={{ color: '#c8ff00', fontWeight: '600', marginBottom: '12px', textTransform: 'uppercase' }}>WHY CHOOSE US</p>
+                            <h2 className="section-title">
                                 Discover a Smarter Way
                                 <br />
                                 to Buy and Sell.

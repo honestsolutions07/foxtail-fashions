@@ -37,7 +37,7 @@ const Footer = () => {
                                 height={40}
                                 style={{ objectFit: 'contain' }}
                             />
-                            <span style={{ fontSize: '20px', fontWeight: '700' }}>Foxtail Fashions</span>
+                            <span className="brand-name">Foxtail Fashions</span>
                         </div>
                         <p className="footer-description">
                             Your Complete Source for Premium Quality Fashion. Discover timeless style and modern elegance.
