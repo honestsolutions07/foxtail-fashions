@@ -65,7 +65,10 @@ const HeroSection = () => {
 
                         {/* CTA Button and Stats */}
                         <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '20px', alignItems: 'center' }}>
-                            <button className="btn-primary hero-btn">
+                            <button
+                                className="btn-primary hero-btn"
+                                onClick={() => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' })}
+                            >
                                 Explore Collection
                                 <svg className="hero-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />

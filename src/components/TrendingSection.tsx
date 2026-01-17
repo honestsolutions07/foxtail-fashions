@@ -48,7 +48,7 @@ const categories = [
 
 const TrendingSection = () => {
     return (
-        <section style={{ padding: '40px 0', overflow: 'hidden', position: 'relative' }}>
+        <section id="categories" style={{ padding: '40px 0', overflow: 'hidden', position: 'relative' }}>
             <div className="container">
                 {/* Cards Stack */}
                 <div className="trending-stack">
