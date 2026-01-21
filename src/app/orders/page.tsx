@@ -359,12 +359,6 @@ export default function UserOrdersPage() {
                                                         <span>Shipping</span>
                                                         <span>{order.shipping === 0 ? 'FREE' : `₹${order.shipping}`}</span>
                                                     </div>
-                                                    {order.gst_amount && order.gst_amount > 0 && (
-                                                        <div className="payment-row">
-                                                            <span>GST (5%)</span>
-                                                            <span>₹{order.gst_amount.toLocaleString('en-IN')}</span>
-                                                        </div>
-                                                    )}
                                                     <div className="payment-row total">
                                                         <span>Total</span>
                                                         <span>₹{order.total.toLocaleString('en-IN')}</span>

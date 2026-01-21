@@ -180,7 +180,7 @@ export default function CartPage() {
                                     alignItems: 'center',
                                     gap: '8px'
                                 }}>
-                                    <span style={{ fontSize: '18px' }}>🎁</span>
+                                    
                                     <p style={{ margin: 0, fontSize: '13px', color: '#92400e', fontWeight: '500' }}>
                                         First order? Use code <span style={{ fontWeight: '700', background: '#fff', padding: '2px 6px', borderRadius: '4px' }}>FOFA</span> for FREE shipping above ₹499!
                                     </p>

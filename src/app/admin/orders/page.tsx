@@ -574,12 +574,6 @@ export default function AdminOrdersPage() {
                                         <span>Subtotal</span>
                                         <span>₹{selectedOrder.subtotal.toLocaleString('en-IN')}</span>
                                     </div>
-                                    {selectedOrder.gst_amount && selectedOrder.gst_amount > 0 && (
-                                        <div className="summary-row">
-                                            <span>GST (5%)</span>
-                                            <span>₹{selectedOrder.gst_amount.toLocaleString('en-IN')}</span>
-                                        </div>
-                                    )}
                                     <div className="summary-row">
                                         <span>Shipping</span>
                                         <span>{selectedOrder.shipping === 0 ? 'FREE' : `₹${selectedOrder.shipping}`}</span>

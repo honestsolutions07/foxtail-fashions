@@ -39,7 +39,6 @@ interface InvoiceProps {
 const COMPANY_INFO = {
     name: 'Foxtail Fashions',
     address: 'Ramachettypalayam, Sundakkmuthur Road, Coimbatore',
-    gstin: '33GFLPM7586H1ZS',
     signatory: 'Subash Rahul M',
 };
 
@@ -315,10 +314,9 @@ export default function Invoice({ order, onClose }: InvoiceProps) {
                                     <h1 className="invoice-company-name">{COMPANY_INFO.name}</h1>
                                 </div>
                                 <p className="invoice-company-text">{COMPANY_INFO.address}</p>
-                                <p className="invoice-company-text"><strong>GSTIN:</strong> {COMPANY_INFO.gstin}</p>
                             </div>
                             <div className="invoice-meta-section">
-                                <h2 className="invoice-title">TAX INVOICE</h2>
+                                <h2 className="invoice-title">INVOICE</h2>
                                 <p className="invoice-meta-text"><strong>Invoice:</strong> {order.invoice_number || `INV-${order.id.slice(-8)}`}</p>
                                 <p className="invoice-meta-text"><strong>Date:</strong> {invoiceDate}</p>
                             </div>
@@ -364,10 +362,6 @@ export default function Invoice({ order, onClose }: InvoiceProps) {
                             <div className="invoice-summary-row">
                                 <span>Subtotal</span>
                                 <span>₹{order.subtotal.toLocaleString('en-IN')}</span>
-                            </div>
-                            <div className="invoice-summary-row">
-                                <span>GST (5%)</span>
-                                <span>₹{(order.gst_amount || 0).toLocaleString('en-IN')}</span>
                             </div>
                             <div className="invoice-summary-row">
                                 <span>Shipping</span>

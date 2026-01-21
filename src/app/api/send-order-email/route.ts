@@ -133,12 +133,6 @@ const generateOrderEmailHTML = (order: OrderData, isAdmin: boolean = false) => {
                             <td style="padding: 8px 0; color: #6b7280;">Subtotal</td>
                             <td style="padding: 8px 0; text-align: right;">₹${order.subtotal.toLocaleString('en-IN')}</td>
                         </tr>
-                        ${order.gst_amount ? `
-                        <tr>
-                            <td style="padding: 8px 0; color: #6b7280;">GST (5%)</td>
-                            <td style="padding: 8px 0; text-align: right;">₹${order.gst_amount.toLocaleString('en-IN')}</td>
-                        </tr>
-                        ` : ''}
                         <tr>
                             <td style="padding: 8px 0; color: #6b7280;">Shipping</td>
                             <td style="padding: 8px 0; text-align: right;">${order.shipping === 0 ? 'FREE' : `₹${order.shipping}`}</td>
